@@ -1,4 +1,4 @@
-# ![Alt text](images/aethra.png) Aethra 🌍
+# ![Alt text](images/aethra-sm.png) Aethra 🌍
 
 **Aethra** Named after the bright sky goddess, Aethra renders the world in light and shadow.
  
