@@ -2,21 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Aethra</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aethra</title>
   <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
   <div id="map"></div>
 
-  <!-- Clock Overlay -->
-  <div id="clock">
-    <div id="local-time"></div>
-    <div id="utc-time"></div>
-  </div>
-
-  <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
-  <script src="main.js"></script>
+  <!-- Main logic entrypoint -->
+  <script type="module" src="main.js"></script>
 </body>
 </html>

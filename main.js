@@ -1,51 +1,28 @@
+// main.js
+//import maplibregl from 'https://cdn.skypack.dev/maplibre-gl';
+import maplibregl from 'https://esm.sh/maplibre-gl@2.4.0';
+
 const map = new maplibregl.Map({
   container: 'map',
-  center: [0, 20],
-  zoom: 1.2,
-  style: 'https://demotiles.maplibre.org/style.json'
+  style: 'https://demotiles.maplibre.org/style.json',
+  center: [0, 0],
+  zoom: 1
 });
 
-map.addControl(new maplibregl.NavigationControl(), 'top-right');
+async function loadPlugins(configPath) {
+  const res = await fetch(configPath);
+  const config = await res.json();
 
-// Live clock (local + UTC)
-function updateClock() {
-  const now = new Date();
-  const local = now.toLocaleTimeString(undefined, { hour12: false });
-  const utc = now.toUTCString().split(' ')[4];
-  document.getElementById('local-time').textContent = `Local: ${local}`;
-  document.getElementById('utc-time').textContent = `UTC:   ${utc}`;
+  for (const pluginName of config.plugins) {
+    try {
+      const plugin = await import(`./plugins/${pluginName}.js`);
+      plugin.default(map);  // Pass map to the plugin
+    } catch (err) {
+      console.error(`Plugin "${pluginName}" failed to load:`, err);
+    }
+  }
 }
-setInterval(updateClock, 1000);
-updateClock();
 
-// Add static night polygon after map loads
 map.on('load', () => {
-  const nightPolygon = {
-    "type": "Feature",
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [[
-        [-180, -85],
-        [-180, 85],
-        [0, 85],
-        [0, -85],
-        [-180, -85]
-      ]]
-    }
-  };
-
-  map.addSource('night', {
-    'type': 'geojson',
-    'data': nightPolygon
-  });
-
-  map.addLayer({
-    'id': 'night',
-    'type': 'fill',
-    'source': 'night',
-    'paint': {
-      'fill-color': '#000000',
-      'fill-opacity': 0.4
-    }
-  });
+  loadPlugins('./config.json');
 });
