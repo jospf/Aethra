@@ -1,6 +1,7 @@
 # Aethra 🌍
 
-**Aethra** is a lightweight, modular prototype for a modern day/night map display inspired by the Geochron 4K.
+**Aethra** Named after the bright sky goddess, Aethra renders the world in light and shadow.
+ 
 
 ## Features
 - Fullscreen world map (MapLibre GL JS)
