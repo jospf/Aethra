@@ -2,7 +2,7 @@
     "plugins": [
       "clock",
       "iss",
-      "moon"
+      "sunmoon"
     ]
   }
   

@@ -1,6 +1,6 @@
-import SunCalc from 'https://cdn.jsdelivr.net/npm/suncalc/+esm';
-
 export default function initSunMoon(map) {
+  console.log("🌞 sunmoon plugin loaded");
+
   const sources = {
     sun: 'sun-position',
     moon: 'moon-position',
@@ -27,11 +27,11 @@ export default function initSunMoon(map) {
 
   const iconSize = 0.50;
 
-  // Load and add icons
+  // Load and register icon images
   function loadAndAddIcon(id, url) {
     map.loadImage(url, (err, image) => {
       if (err) {
-        console.error(`Failed to load ${id}:`, err);
+        console.error(`❌ Failed to load ${id}:`, err);
         return;
       }
       if (!map.hasImage(id)) {
@@ -43,6 +43,11 @@ export default function initSunMoon(map) {
 
   loadAndAddIcon('sun-icon', icons.sun);
   loadAndAddIcon('moon-icon', icons.moon);
+
+  // Then call like:
+  loadAndAddIcon('sun', 'sun-icon', './assets/sun.png');
+  loadAndAddIcon('moon', 'moon-icon', './assets/moon.png');
+  
 
   // Add sources and layers
   for (const body of ['sun', 'moon']) {
@@ -82,48 +87,48 @@ export default function initSunMoon(map) {
     });
   }
 
+  // Fetch subsolar/sublunar points from local Flask server
   function updatePositions() {
-    const now = new Date();
-  
-    // SUN SUBPOINT (correct using declination and GHA)
-    const sunPos = SunCalc.getPosition(now, 0, 0);
-    const sunLat = sunPos.altitude * (180 / Math.PI); // declination ≈ subsolar latitude
-    const sunGHA = (now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600) * 15;
-    const sunLon = ((-sunGHA + 360) % 360) - 180;
-  
-    // MOON SUBPOINT (approx using same logic)
-    const moonPos = SunCalc.getMoonPosition(now, 0, 0);
-    const moonLat = moonPos.altitude * (180 / Math.PI); // approx lunar declination
-    const moonGHA = (now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600) * 15;
-    const moonLon = ((-moonGHA + moonPos.azimuth * (180 / Math.PI) + 360) % 360) - 180;
-  
-    const subpoints = {
-      sun: [sunLon, sunLat],
-      moon: [moonLon, moonLat]
-    };
-  
-    for (const body of ['sun', 'moon']) {
-      const coord = subpoints[body];
-  
-      map.getSource(sources[body]).setData({
-        type: 'FeatureCollection',
-        features: [{
-          type: 'Feature',
-          geometry: { type: 'Point', coordinates: coord },
-          properties: {}
-        }]
+    console.log("🔁 updatePositions() called");
+
+    fetch("http://localhost:5000/subpoints")
+      .then(res => res.json())
+      .then(data => {
+        console.log("Fetched subpoints:", data);
+
+        const subpoints = {
+          sun: [data.sun.lon, data.sun.lat],
+          moon: [data.moon.lon, data.moon.lat]
+        };
+
+        for (const body of ['sun', 'moon']) {
+          const coord = subpoints[body];
+          console.log(`🛰 Updating ${body} position:`, coord);
+
+          map.getSource(sources[body]).setData({
+            type: 'FeatureCollection',
+            features: [{
+              type: 'Feature',
+              geometry: { type: 'Point', coordinates: coord },
+              properties: {}
+            }]
+          });
+
+          trails[body].push(coord);
+          if (trails[body].length > 120) trails[body].shift();
+
+          map.getSource(sources[body + 'Trail']).setData({
+            type: 'Feature',
+            geometry: { type: 'LineString', coordinates: [...trails[body]] }
+          });
+        }
+      })
+      .catch(err => {
+        console.error("❌ Failed to fetch subpoints:", err);
       });
-  
-      trails[body].push(coord);
-      if (trails[body].length > 120) trails[body].shift();
-  
-      map.getSource(sources[body + 'Trail']).setData({
-        type: 'Feature',
-        geometry: { type: 'LineString', coordinates: [...trails[body]] }
-        });
-    }
   }
-  
+
+  // Call immediately, then every 5 seconds
   updatePositions();
   setInterval(updatePositions, 5000);
 }

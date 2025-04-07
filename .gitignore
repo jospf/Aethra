@@ -1,2 +1,9 @@
 .git/
 todo.org
+ignore/
+Makefile
+setup.sh
+server.sh
+rm
+aethra-backend/
+*.bsp
