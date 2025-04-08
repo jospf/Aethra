@@ -14,7 +14,9 @@
 
 ## Plugins
 -Sun and Moon location above the Earth
+
 -ISS location
+
 -Current Stardate 🖖
 
 ## Getting Started
