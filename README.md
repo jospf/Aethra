@@ -30,7 +30,7 @@ Aethra is a modular, plugin-based world map dashboard inspired by the Geochron 4
 ### 1. Clone the repository:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/aethra.git
+git clone https://github.com/jospf/aethra.git
 cd aethra
 ```
 
