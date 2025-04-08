@@ -6,6 +6,7 @@
 ## Features
 - Fullscreen world map (MapLibre GL JS)
 - Ready for twilight/terminator overlays, time zones, and plugins
+![Alt Text](assets/Clock-display.jpg)
 
 ## Getting Started
 1. Open `index.html` in any modern browser.

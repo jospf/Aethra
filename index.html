@@ -2,28 +2,47 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aethra</title>
-  <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-    }
-    #map {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 100%;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- MapLibre CSS -->
+  <link
+    href="https://cdn.skypack.dev/maplibre-gl@2.4.0/dist/maplibre-gl.css"
+    rel="stylesheet"
+  />
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- Left Timezone Panel -->
+  <div id="clock-left" class="clock-panel">
+    <div class="clock-block">
+      <div class="clock-time" id="clock-local">--:--</div>
+      <div class="clock-label">LOCAL</div>
+    </div>
+    <div class="clock-block">
+      <div class="clock-time" id="clock-pacific">--:--</div>
+      <div class="clock-label">PACIFIC</div>
+    </div>
+  </div>
+
+  <!-- Right Timezone Panel -->
+  <div id="clock-right" class="clock-panel">
+    <div class="clock-block">
+      <div class="clock-time" id="clock-zulu">--:--</div>
+      <div class="clock-label">ZULU</div>
+    </div>
+    <div class="clock-block">
+      <div class="clock-time" id="clock-julian">---</div>
+      <div class="clock-label">JULIAN</div>
+    </div>
+  </div>
+
+  <!-- Main Map Container -->
   <div id="map"></div>
 
-  <!-- Main logic entrypoint -->
-  <script type="module" src="main.js"></script>
+  <!-- Main Logic -->
+  <script type="module" src="./main.js"></script>
 </body>
 </html>

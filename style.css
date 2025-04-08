@@ -2,24 +2,54 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  width: 100%;
-  background: black;
+  overflow: hidden;
+  font-family: monospace;
+  background-color: black;
 }
 
 #map {
   position: absolute;
-  top: 0; bottom: 0; left: 0; right: 0;
+  top: 0;
+  left: 120px; /* account for left clock panel */
+  right: 120px; /* account for right clock panel */
+  bottom: 0;
 }
 
-#clock {
+.clock-panel {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  color: white;
-  background: rgba(0, 0, 0, 0.5);
+  top: 0;
+  width: 120px;
+  height: 100%;
+  background: black;
+  color: #00ff00;
   font-family: monospace;
-  padding: 8px 12px;
-  border-radius: 6px;
-  z-index: 10;
-  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  pointer-events: none;
+}
+
+#clock-left {
+  left: 0;
+}
+
+#clock-right {
+  right: 0;
+}
+
+.clock-block {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.clock-time {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.clock-label {
+  font-size: 14px;
+  margin-top: 4px;
 }
