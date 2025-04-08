@@ -12,6 +12,11 @@
 - Ready for twilight/terminator overlays, time zones, and plugins
 ![Alt Text](assets/Clock-display.jpg)
 
+## Plugins
+-Sun and Moon location above the Earth
+-ISS location
+-Current Stardate 🖖
+
 ## Getting Started
 1. Open `index.html` in any modern browser.
 2. Pan, zoom, and explore the world!
