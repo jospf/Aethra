@@ -1,8 +1,22 @@
 {
-    "plugins": [
-      "clock-panel",
-      "iss",
-      "sunmoon"
+  "location": {
+    "name": "Portland, OR",
+    "latitude": 45.5152,
+    "longitude": -122.6784
+  },
+  "plugins": [
+    "clock",
+    "sunmoon",
+    "iss"
+  ],
+  "clock": {
+    "timezones": [
+      { "tz": "UTC", "label": "UTC" },
+      { "tz": "America/New_York", "label": "NYC" },
+      { "tz": "America/Los_Angeles", "label": "LOS" },
+      { "tz": "Europe/London", "label": "LON" },
+      { "tz": "Pacific/Tongatapu", "label": "TOK" },
+      { "tz": "Australia/Sydney", "label": "SYD" }
     ]
   }
-  
+}

@@ -5,44 +5,35 @@
   <title>Aethra</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- MapLibre CSS -->
+  <!-- MapLibre Styles -->
   <link
     href="https://cdn.skypack.dev/maplibre-gl@2.4.0/dist/maplibre-gl.css"
     rel="stylesheet"
   />
 
-  <!-- Custom Styles -->
+  <!-- Optional: Digital display font (Star Trek / LCD style) -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Your custom styles -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Left Timezone Panel -->
-  <div id="clock-left" class="clock-panel">
-    <div class="clock-block">
-      <div class="clock-time" id="clock-local">--:--</div>
-      <div class="clock-label">LOCAL</div>
-    </div>
-    <div class="clock-block">
-      <div class="clock-time" id="clock-pacific">--:--</div>
-      <div class="clock-label">PACIFIC</div>
-    </div>
-  </div>
+  <!-- Left Clock Panel (dynamic clocks go here via plugin) -->
+  <div id="clock-left" class="clock-panel"></div>
 
-  <!-- Right Timezone Panel -->
-  <div id="clock-right" class="clock-panel">
-    <div class="clock-block">
-      <div class="clock-time" id="clock-zulu">--:--</div>
-      <div class="clock-label">ZULU</div>
-    </div>
-    <div class="clock-block">
-      <div class="clock-time" id="clock-julian">---</div>
-      <div class="clock-label">JULIAN</div>
-    </div>
-  </div>
+  <!-- Right Clock Panel -->
+  <div id="clock-right" class="clock-panel"></div>
 
-  <!-- Main Map Container -->
+  <!-- Stardate Display -->
+  <div id="stardate" class="stardate-display"></div>
+
+  <!-- Map container -->
   <div id="map"></div>
 
-  <!-- Main Logic -->
+  <!-- Plugin loader and map logic -->
   <script type="module" src="./main.js"></script>
 </body>
 </html>

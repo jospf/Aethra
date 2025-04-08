@@ -1,58 +1,80 @@
-import { DateTime } from "https://cdn.skypack.dev/luxon";
-
-export default function initClock(map) {
-  console.log("🕒 Clock plugin loaded");
-
-  const zones = [
-    'Pacific/Honolulu',
-    'America/Los_Angeles',
-    'America/Chicago',
-    'America/New_York',
-    'Europe/London',
-    'Asia/Tokyo'
-  ];
-
-  // Approximate longitudes for each timezone (used to position on map)
-  const zoneLongitudes = {
-  //  'Pacific/Honolulu': -157,
-    'America/Los_Angeles': -122,
-  //  'America/Chicago': -87,
-    'America/New_York': -74,
-    'Europe/London': 0,
-    'Asia/Tokyo': 139
-  };
-
-  const container = document.createElement("div");
-  container.id = "clock-top-container";
-  document.body.appendChild(container);
-
-  zones.forEach(zone => {
-    const clock = document.createElement("div");
-    clock.className = "clock-timezone";
-    clock.dataset.zone = zone;
-
-    // Map longitude to % left position
-    const lon = zoneLongitudes[zone];
-    const leftPercent = ((lon + 180) / 360) * 100;
-    clock.style.left = `${leftPercent}%`;
-
-    clock.innerHTML = `
-      <div class="clock-time">--:--</div>
-      <div class="clock-zone">${zone}</div>
-    `;
-
-    container.appendChild(clock);
-  });
-
-  function updateClocks() {
-    document.querySelectorAll(".clock-timezone").forEach(div => {
-      const zone = div.dataset.zone;
-      const now = DateTime.now().setZone(zone);
-
-      div.querySelector(".clock-time").textContent = now.toFormat("HH:mm");
-    });
+export default async function initClock(map) {
+    const response = await fetch('./config.json');
+    const config = await response.json();
+    const timezones = config.timezones || [
+      'UTC', 'America/New_York', 'America/Los_Angeles', 
+      'Europe/London', 'Asia/Tokyo', 'Australia/Sydney'
+    ];
+  
+    const leftClocks = timezones.slice(0, 3);
+    const rightClocks = timezones.slice(3);
+  
+    function createClockColumn(id, timezones) {
+      const col = document.createElement('div');
+      col.className = `clock-column ${id}`;
+      timezones.forEach(tz => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'clock-wrapper';
+  
+        const timeEl = document.createElement('div');
+        timeEl.className = 'clock-time';
+        timeEl.dataset.tz = tz;
+  
+        const ampmEl = document.createElement('div');
+        ampmEl.className = 'clock-ampm';
+  
+        const labelEl = document.createElement('div');
+        labelEl.className = 'clock-label';
+        labelEl.innerText = getTzAbbreviation(tz);
+  
+        wrapper.appendChild(timeEl);
+        wrapper.appendChild(ampmEl);
+        wrapper.appendChild(labelEl);
+        col.appendChild(wrapper);
+      });
+      return col;
+    }
+  
+    const left = createClockColumn('left', leftClocks);
+    const right = createClockColumn('right', rightClocks);
+    document.body.appendChild(left);
+    document.body.appendChild(right);
+  
+    const stardate = document.createElement('div');
+    stardate.id = 'stardate';
+    document.body.appendChild(stardate);
+  
+    function updateClocks() {
+      const now = new Date();
+      document.querySelectorAll('.clock-time').forEach(el => {
+        const tz = el.dataset.tz;
+        const date = new Date().toLocaleString('en-US', { timeZone: tz });
+        const d = new Date(date);
+        const hours = d.getHours();
+        const minutes = d.getMinutes().toString().padStart(2, '0');
+        const displayHour = (hours % 12 || 12).toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+  
+        el.innerText = `${displayHour}:${minutes}`;
+        el.nextSibling.innerText = ampm;
+      });
+  
+      // Update stardate
+      const dayOfYear = Math.floor((Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - Date.UTC(now.getFullYear(), 0, 0)) / 86400000);
+      const fractionalDay = now.getUTCHours() / 24 + now.getUTCMinutes() / 1440;
+      const starDate = `${now.getFullYear()}.${(dayOfYear + fractionalDay).toFixed(1)}`;
+      stardate.innerText = `Stardate ${starDate}`;
+    }
+  
+    function getTzAbbreviation(tz) {
+      const abbr = new Date().toLocaleTimeString('en-us', {
+        timeZone: tz,
+        timeZoneName: 'short'
+      }).split(' ').pop();
+      return abbr.length > 5 ? tz.split('/')[1].slice(0, 3).toUpperCase() : abbr;
+    }
+  
+    updateClocks();
+    setInterval(updateClocks, 10000);
   }
-
-  updateClocks();
-  setInterval(updateClocks, 60 * 1000);
-}
+  

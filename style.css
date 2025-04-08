@@ -1,55 +1,65 @@
-html, body {
+/* Global style reset and map container */
+body {
   margin: 0;
   padding: 0;
-  height: 100%;
-  overflow: hidden;
-  font-family: monospace;
   background-color: black;
+  font-family: 'Share Tech Mono', monospace;
+  color: lime;
 }
 
 #map {
   position: absolute;
   top: 0;
-  left: 120px; /* account for left clock panel */
-  right: 120px; /* account for right clock panel */
   bottom: 0;
+  left: 120px;
+  right: 120px;
+  z-index: 1;
 }
 
-.clock-panel {
+.clock-column {
   position: absolute;
-  top: 0;
-  width: 120px;
-  height: 100%;
-  background: black;
+  top: 40%;
+  width: 100px;
   color: #00ff00;
-  font-family: monospace;
+  font-family: 'Orbitron', monospace;
+  font-size: 1.4em;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  z-index: 999;
-  pointer-events: none;
+  gap: 15px;
 }
 
-#clock-left {
-  left: 0;
+.clock-column.left {
+  left: 10px;
 }
 
-#clock-right {
-  right: 0;
+.clock-column.right {
+  right: 10px;
 }
 
-.clock-block {
-  margin: 20px 0;
+.clock-wrapper {
   text-align: center;
+  line-height: 1.2;
 }
 
 .clock-time {
-  font-size: 32px;
-  font-weight: bold;
+  font-size: 1.4em;
+  
 }
 
-.clock-label {
-  font-size: 14px;
-  margin-top: 4px;
+.clock-ampm, .clock-label {
+  font-size: 0.8em;
 }
+
+#stardate {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: black;
+  font-size: 1.4em;
+  font-weight: bold;
+  font-family: 'Orbitron', sans-serif;
+  z-index: 1000;
+}
+
