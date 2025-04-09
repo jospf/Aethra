@@ -1,5 +1,5 @@
 {
-  "location": {
+  "location": {               
     "name": "Portland, OR",
     "latitude": 45.5152,
     "longitude": -122.6784
@@ -7,9 +7,10 @@
   "plugins": [
     "clock",
     "sunmoon",
-    "iss"
+    "iss",
+    "weather"
   ],
-  "clock": {
+  "clock": {         
     "timezones": [
       { "tz": "UTC", "label": "UTC" },
       { "tz": "America/New_York", "label": "NYC" },
@@ -18,5 +19,8 @@
       { "tz": "Pacific/Tongatapu", "label": "TOK" },
       { "tz": "Australia/Sydney", "label": "SYD" }
     ]
+  },
+  "weather": {  
+    "openweathermap_api_key": "YOUR API_KEY_HERE",
   }
 }
