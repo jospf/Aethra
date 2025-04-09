@@ -1,8 +1,9 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-from skyfield.api import load
+from skyfield.api import load, EarthSatellite
 from skyfield.toposlib import wgs84
 from datetime import datetime, timezone
+import requests
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:8000"])
@@ -41,6 +42,35 @@ def subpoints():
 ts = load.timescale()
 planets = load('de421.bsp')
 earth, sun = planets['earth'], planets['sun']
+
+
+@app.route('/iss')
+def iss():
+    # Fetch latest ISS TLE data from CelesTrak
+    tle_url = 'https://celestrak.org/NORAD/elements/stations.txt'
+    tle_data = requests.get(tle_url).text.splitlines()
+
+    # Look for the ISS TLE block
+    for i in range(len(tle_data)):
+        if tle_data[i].strip() == "ISS (ZARYA)":
+            name = tle_data[i]
+            line1 = tle_data[i + 1]
+            line2 = tle_data[i + 2]
+            break
+    else:
+        return jsonify({"error": "ISS TLE not found"}), 500
+
+    # Create satellite and compute subpoint
+    satellite = EarthSatellite(line1, line2, name, ts)
+    t = ts.now()
+    subpoint = wgs84.subpoint(satellite.at(t))
+
+    return jsonify({
+        "timestamp": t.utc_iso(),
+        "lat": subpoint.latitude.degrees,
+        "lon": subpoint.longitude.degrees
+    })
+
 
 @app.route('/terminator')
 def terminator():
