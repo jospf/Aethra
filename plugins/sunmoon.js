@@ -45,8 +45,8 @@ export default function initSunMoon(map) {
   loadAndAddIcon('moon-icon', icons.moon);
 
   // Then call like:
-  loadAndAddIcon('sun', 'sun-icon', './assets/sun.png');
-  loadAndAddIcon('moon', 'moon-icon', './assets/moon.png');
+  loadAndAddIcon('sun-icon', './assets/sun.png');
+  loadAndAddIcon('moon-icon', './assets/moon.png');
   
 
   // Add sources and layers

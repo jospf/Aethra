@@ -2,7 +2,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from skyfield.api import load
 from skyfield.toposlib import wgs84
-from datetime import datetime
+from datetime import datetime, timezone
 
 app = Flask(__name__)
 CORS(app)
@@ -27,7 +27,7 @@ def subpoints():
     moon_sp = wgs84.subpoint(moon_astrometric)
 
     return jsonify({
-        "timestamp": datetime.utcnow().isoformat() + 'Z',
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "sun": {
             "lat": sun_sp.latitude.degrees,
             "lon": sun_sp.longitude.degrees

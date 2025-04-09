@@ -1,7 +1,7 @@
 export default async function initClock(map) {
     const response = await fetch('./config.json');
     const config = await response.json();
-    const timezones = config.timezones || [
+    const timezones = config.clock?.timezones || [
       'UTC', 'America/New_York', 'America/Los_Angeles', 
       'Europe/London', 'Asia/Tokyo', 'Australia/Sydney'
     ];
@@ -12,26 +12,27 @@ export default async function initClock(map) {
     function createClockColumn(id, timezones) {
       const col = document.createElement('div');
       col.className = `clock-column ${id}`;
-      timezones.forEach(tz => {
+      timezones.forEach(zone => {
         const wrapper = document.createElement('div');
         wrapper.className = 'clock-wrapper';
-  
+      
         const timeEl = document.createElement('div');
         timeEl.className = 'clock-time';
-        timeEl.dataset.tz = tz;
-  
+        timeEl.dataset.tz = zone.tz;
+      
         const ampmEl = document.createElement('div');
         ampmEl.className = 'clock-ampm';
-  
+      
         const labelEl = document.createElement('div');
         labelEl.className = 'clock-label';
-        labelEl.innerText = getTzAbbreviation(tz);
-  
+        labelEl.innerText = zone.label || getTzAbbreviation(zone.tz);
+      
         wrapper.appendChild(timeEl);
         wrapper.appendChild(ampmEl);
         wrapper.appendChild(labelEl);
         col.appendChild(wrapper);
       });
+    
       return col;
     }
   
@@ -43,6 +44,10 @@ export default async function initClock(map) {
     const stardate = document.createElement('div');
     stardate.id = 'stardate';
     document.body.appendChild(stardate);
+
+    const julian = document.createElement('div');
+    julian.id = 'julian-date';
+    document.body.appendChild(julian);
   
     function updateClocks() {
       const now = new Date();
@@ -64,6 +69,9 @@ export default async function initClock(map) {
       const fractionalDay = now.getUTCHours() / 24 + now.getUTCMinutes() / 1440;
       const starDate = `${now.getFullYear()}.${(dayOfYear + fractionalDay).toFixed(1)}`;
       stardate.innerText = `Stardate ${starDate}`;
+      const julianDay = Math.floor((Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - Date.UTC(now.getFullYear(), 0, 0)) / 86400000);
+      julian.innerText = `Julian ${julianDay}`;
+
     }
   
     function getTzAbbreviation(tz) {
