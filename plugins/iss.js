@@ -33,7 +33,7 @@ export default function initISS(map) {
       source: sourceId,
       layout: {
         'icon-image': iconId,
-        'icon-size': 0.50,
+        'icon-size': 0.90,
         'icon-allow-overlap': true
       }
     });
@@ -68,7 +68,7 @@ export default function initISS(map) {
 
         // Update track history
         track.push(coords);
-        if (track.length > 120) track.shift();
+        if (track.length > 360) track.shift();
 
         map.getSource(trackSourceId).setData({
           type: 'Feature',
@@ -81,6 +81,6 @@ export default function initISS(map) {
     }
 
     updateISSPosition();
-    setInterval(updateISSPosition, 5000);
+    setInterval(updateISSPosition, 30000);
   });
 }
