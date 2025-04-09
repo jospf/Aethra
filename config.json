@@ -8,7 +8,8 @@
     "clock",
     "sunmoon",
     "iss",
-    "earth"
+    "earth",
+    "terminator"
   ],
   "clock": {         
     "timezones": [
