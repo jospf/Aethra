@@ -23,5 +23,10 @@
   },
   "weather": {  
     "openweathermap_api_key": "YOUR API_KEY_HERE"
+  },
+  "sunmoon": {
+    "showSun":  false,
+    "showMoon": true
   }
+
 }

@@ -1,26 +1,29 @@
-export default function initSunMoon(map) {
+export default async function initSunMoon(map) {
   const DEBUG = true;
-  if (DEBUG) console.log("🌞 sunmoon plugin loaded");
+  if (DEBUG) console.log("\ud83c\udf1e sunmoon plugin loaded");
 
-  const config = {
-    iconSize: 1.0,
-    bodies: ['sun', 'moon'],
-    icons: {
-      sun: './assets/sun-icon.png',
-      moon: './assets/moon-icon.png'
-    },
-    sources: {
-      sun: 'sun-position',
-      moon: 'moon-position'
-    },
-    layers: {
-      sunIcon: 'sun-symbol',
-      moonIcon: 'moon-symbol'
-    }
+  const configResponse = await fetch('./config.json');
+  const fullConfig = await configResponse.json();
+  const defaultConfig = { showSun: true, showMoon: true };
+  const pluginConfig = { ...defaultConfig, ...(fullConfig.sunmoon || {}) };
+
+  const iconSize = 1.1;
+  const bodies = [];
+  if (pluginConfig.showSun === true) bodies.push('sun');
+  if (pluginConfig.showMoon === true) bodies.push('moon');
+
+  const sources = {
+    sun: 'sun-position',
+    moon: 'moon-position'
+  };
+
+  const layers = {
+    sunIcon: 'sun-symbol',
+    moonIcon: 'moon-symbol'
   };
 
   function updatePositions() {
-    if (DEBUG) console.log("🔁 updatePositions() called");
+    if (DEBUG) console.log("\ud83d\udd01 updatePositions() called");
 
     fetch("http://localhost:5000/subpoints")
       .then(res => res.json())
@@ -30,11 +33,11 @@ export default function initSunMoon(map) {
           moon: [data.moon.lon, data.moon.lat]
         };
 
-        config.bodies.forEach(body => {
+        bodies.forEach(body => {
           const coord = subpoints[body];
-          if (DEBUG) console.log(`🛰 Updating ${body} position:`, coord);
+          if (DEBUG) console.log(`\ud83d\ude80 Updating ${body} position:`, coord);
 
-          map.getSource(config.sources[body]).setData({
+          map.getSource(sources[body]).setData({
             type: 'FeatureCollection',
             features: [{
               type: 'Feature',
@@ -45,24 +48,24 @@ export default function initSunMoon(map) {
         });
       })
       .catch(err => {
-        console.error("❌ Failed to fetch subpoints:", err);
+        console.error("\u274c Failed to fetch subpoints:", err);
       });
   }
 
   function addSourcesAndLayers() {
-    config.bodies.forEach(body => {
-      map.addSource(config.sources[body], {
+    bodies.forEach(body => {
+      map.addSource(sources[body], {
         type: 'geojson',
         data: { type: 'FeatureCollection', features: [] }
       });
 
       map.addLayer({
-        id: config.layers[body + 'Icon'],
+        id: layers[body + 'Icon'],
         type: 'symbol',
-        source: config.sources[body],
+        source: sources[body],
         layout: {
           'icon-image': `${body}-icon`,
-          'icon-size': config.iconSize,
+          'icon-size': iconSize,
           'icon-allow-overlap': true
         }
       });
@@ -74,29 +77,32 @@ export default function initSunMoon(map) {
 
   function loadIconsThenAddLayers() {
     if (!map.isStyleLoaded()) {
-      if (DEBUG) console.log("⏰ Waiting for style to load...");
+      if (DEBUG) console.log("\u23f0 Waiting for style to load...");
       map.once('styledata', loadIconsThenAddLayers);
       return;
     }
 
-    map.loadImage(config.icons.sun, (err, image) => {
-      if (err || !image) return console.error("❌ Could not load sun image", err);
-      if (!map.hasImage('sun-icon')) {
-        map.addImage('sun-icon', image);
-        if (DEBUG) console.log("✅ sun-icon added");
-      }
-
-      map.loadImage(config.icons.moon, (err2, image2) => {
-        if (err2 || !image2) return console.error("❌ Could not load moon image", err2);
-        if (!map.hasImage('moon-icon')) {
-          map.addImage('moon-icon', image2);
-          if (DEBUG) console.log("✅ moon-icon added");
+    const loadQueue = bodies.map(body => new Promise((resolve, reject) => {
+      map.loadImage(`./assets/${body}.png`, (err, image) => {
+        if (err || !image) {
+          console.error(`\u274c Could not load ${body} icon`, err);
+          resolve(); // silently continue if file is missing
+        } else {
+          if (!map.hasImage(`${body}-icon`)) {
+            map.addImage(`${body}-icon`, image);
+            if (DEBUG) console.log(`\u2705 ${body}-icon added`);
+          }
+          resolve();
         }
-
-        if (DEBUG) console.log("✅ Both icons loaded — adding sources and layers");
-        addSourcesAndLayers();
       });
-    });
+    }));
+
+    Promise.all(loadQueue)
+      .then(() => {
+        if (DEBUG) console.log("\u2705 All icons processed — adding sources and layers");
+        addSourcesAndLayers();
+      })
+      .catch(err => console.error("\u274c Icon load failure", err));
   }
 
   loadIconsThenAddLayers();

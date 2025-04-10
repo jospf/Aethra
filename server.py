@@ -4,6 +4,7 @@ from skyfield.api import load, EarthSatellite
 from skyfield.toposlib import wgs84
 from datetime import datetime, timezone
 import requests
+import traceback
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:8000"])
@@ -46,30 +47,29 @@ earth, sun = planets['earth'], planets['sun']
 
 @app.route('/iss')
 def iss():
-    # Fetch latest ISS TLE data from CelesTrak
-    tle_url = 'https://celestrak.org/NORAD/elements/stations.txt'
-    tle_data = requests.get(tle_url).text.splitlines()
+    try:
+        # fallback TLE
+        fallback_tle = [
+            "ISS (ZARYA)",
+            "1 25544U 98067A   24100.67873843  .00003578  00000+0  73447-4 0  9994",
+            "2 25544  51.6384 104.1685 0004321 305.4353 182.5320 15.50086897439957"
+        ]
+        name, line1, line2 = fallback_tle
 
-    # Look for the ISS TLE block
-    for i in range(len(tle_data)):
-        if tle_data[i].strip() == "ISS (ZARYA)":
-            name = tle_data[i]
-            line1 = tle_data[i + 1]
-            line2 = tle_data[i + 2]
-            break
-    else:
-        return jsonify({"error": "ISS TLE not found"}), 500
+        satellite = EarthSatellite(line1, line2, name, ts)
+        t = ts.now()
+        subpoint = wgs84.subpoint(satellite.at(t))
 
-    # Create satellite and compute subpoint
-    satellite = EarthSatellite(line1, line2, name, ts)
-    t = ts.now()
-    subpoint = wgs84.subpoint(satellite.at(t))
+        return jsonify({
+            "timestamp": t.utc_iso(),
+            "lat": subpoint.latitude.degrees,
+            "lon": subpoint.longitude.degrees
+        })
 
-    return jsonify({
-        "timestamp": t.utc_iso(),
-        "lat": subpoint.latitude.degrees,
-        "lon": subpoint.longitude.degrees
-    })
+    except Exception as e:
+        print("❌ ISS route error:")
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route('/terminator')
