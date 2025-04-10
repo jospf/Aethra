@@ -63,13 +63,3 @@ body {
   z-index: 1000;
 }
 
-#julian-date {
-  position: absolute;
-  top: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: black;
-  font-size: 1.4em;
-  font-family: 'Orbitron', sans-serif;
-  z-index: 1000;
-}

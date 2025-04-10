@@ -11,7 +11,8 @@
     "earth",
     "terminator"
   ],
-  "clock": {         
+  "clock": {
+    "showStardate": true,         
     "timezones": [
       { "tz": "UTC", "label": "UTC" },
       { "tz": "America/New_York", "label": "NYC" },
