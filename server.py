@@ -97,5 +97,59 @@ def terminator():
         "timestamp": t.utc_iso()
     })
 
+
+@app.route('/starlink')
+def starlink():
+    try:
+        # Fetch TLE data for Starlink satellites
+        tle_url = "https://celestrak.org/NORAD/elements/supplemental/sup-gp.php?FILE=starlink&FORMAT=tle"  # Updated URL
+        response = requests.get(tle_url)
+        response.raise_for_status()
+
+        print("Fetched TLE data:", response.text[:500])  # Log the first 500 characters of the TLE data
+
+        tle_lines = response.text.strip().split("\n")
+
+        if not tle_lines or len(tle_lines) < 3:
+            return jsonify({"error": "No valid TLE data found"}), 500
+
+        print("Parsed TLE lines:", tle_lines[:6])  # Log the first two TLE entries for debugging
+
+        satellites = []
+
+        # Parse TLE data
+        for i in range(0, len(tle_lines), 3):
+            if i + 2 >= len(tle_lines):
+                print(f"Skipping incomplete TLE entry at lines {i}-{i+2}")
+                continue
+
+            name = tle_lines[i].strip()
+            line1 = tle_lines[i + 1].strip()
+            line2 = tle_lines[i + 2].strip()
+
+            try:
+                satellite = EarthSatellite(line1, line2, name, ts)
+                t = ts.now()
+                subpoint = wgs84.subpoint(satellite.at(t))
+
+                satellites.append({
+                    "name": name,
+                    "latitude": subpoint.latitude.degrees,
+                    "longitude": subpoint.longitude.degrees
+                })
+            except Exception as e:
+                print(f"Error processing satellite {name}: {e}")
+
+        return jsonify({
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "satellites": satellites
+        })
+
+    except Exception as e:
+        print("❌ Starlink route error:")
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == '__main__':
     app.run(debug=True)

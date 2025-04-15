@@ -9,7 +9,8 @@
     "sunmoon",
     "iss",
     "earth",
-    "terminator"
+    "terminator",
+    "starlink"
   ],
   "clock": {
     "showStardate": true,         
