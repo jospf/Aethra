@@ -7,3 +7,4 @@ server.sh
 rm
 aethra-backend/
 *.bsp
+localConfig.json

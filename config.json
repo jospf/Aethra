@@ -9,8 +9,8 @@
     "sunmoon",
     "iss",
     "earth",
-    "terminator",
-    "starlink"
+    "weather",
+    "terminator"
   ],
   "clock": {
     "showStardate": true,         
@@ -24,10 +24,12 @@
     ]
   },
   "weather": {  
-    "openweathermap_api_key": "YOUR API_KEY_HERE"
+    "enabled": false,
+    "layer": "clouds_new",
+    "opacity": 0.6
   },
   "sunmoon": {
-    "showSun":  false,
+    "showSun":  true,
     "showMoon": true
   }
 

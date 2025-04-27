@@ -1,63 +1,51 @@
 export default async function initWeather(map) {
-    console.log("☁️ Weather plugin loaded");
-  
-    try {
-      const res = await fetch('./config.json');
-      const config = await res.json();
-      const apiKey = config.weather?.openweathermap_api_key;
-  
-      if (!apiKey) {
-        console.warn("⚠️ No OpenWeatherMap API key found in config.json");
-        return;
-      }
-  
-      console.log("🔑 API key loaded:", apiKey);
-      console.log("🗘️ Map style loaded?", map.isStyleLoaded());
-  
-      function addCloudLayer() {
-        console.log("⛅️ Attempting to add cloud source and layer");
-  
-        if (map.getSource('clouds')) {
-          console.warn("☁️ Cloud source already exists — skipping");
-          return;
-        }
-  
-        map.addSource("clouds", {
-          type: "raster",
-          tiles: [
-            `https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${apiKey}`
-          ],
-          tileSize: 256
-        });
-  
-        map.addLayer({
-          id: "clouds-layer",
-          type: "raster",
-          source: "clouds",
-          paint: {
-            "raster-opacity": 1
-          }
-        });
-  
-        console.log("✅ Cloud layer added");
-      }
-  
-      if (map.isStyleLoaded()) {
-        console.log("🟢 Style is already loaded — adding immediately");
-        addCloudLayer();
-      } else {
-        console.log("🟡 Waiting for map load or styledata");
-        map.once('styledata', () => {
-          console.log("🟢 styledata event fired — adding cloud layer");
-          addCloudLayer();
-        });
-        map.once('load', () => {
-          console.log("🟢 load event fired — adding cloud layer");
-          addCloudLayer();
-        });
-      }
-    } catch (err) {
-      console.error("🔥 Weather plugin failed:", err);
-    }
+  console.log("\u2601\ufe0f weather plugin loaded");
+
+  let apiKey = null;
+  let config = null;
+
+  try {
+    const res = await fetch('./localConfig.json');
+    const local = await res.json();
+    apiKey = local.weatherApiKey;
+    if (!apiKey) throw new Error("No API key in localConfig.json");
+  } catch (err) {
+    console.warn("No valid API key found in localConfig.json. Skipping weather overlay.", err);
+    return;
   }
-  
+
+  try {
+    const configRes = await fetch('./config.json');
+    config = await configRes.json();
+  } catch (err) {
+    console.warn("Could not load config.json:", err);
+    return;
+  }
+
+  if (!config.weather || config.weather.enabled === false) {
+    console.log("\u26c5 Weather plugin disabled in config.json");
+    return;
+  }
+
+  const layerType = config.weather.layer || 'clouds_new';
+  const opacity = config.weather.opacity ?? 0.5;
+
+  const tileUrl = `https://tile.openweathermap.org/map/${layerType}/{z}/{x}/{y}.png?appid=${apiKey}`;
+
+  map.addSource('weather-clouds', {
+    type: 'raster',
+    tiles: [tileUrl],
+    tileSize: 256
+  });
+
+  map.addLayer({
+    id: 'weather-cloud-layer',
+    type: 'raster',
+    source: 'weather-clouds',
+    paint: {
+      'raster-opacity': opacity
+    }
+  }, 'sun-symbol'); // ✅ Insert weather below sun (and moon) so icons stay visible
+
+  console.log(`\u2601\ufe0f ${layerType} layer added to map with opacity ${opacity}`);
+}
