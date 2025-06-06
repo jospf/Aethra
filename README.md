@@ -36,8 +36,9 @@ cd aethra
 
 ### 2. Install Python dependencies (optional backend):
 
+From the repository root (where `server.py` lives):
+
 ```bash
-cd aethra-backend
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
