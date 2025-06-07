@@ -9,7 +9,6 @@
     "sunmoon",
     "iss",
     "earth",
-    "weather",
     "terminator"
   ],
   "clock": {
@@ -29,7 +28,7 @@
     "opacity": 0.6
   },
   "sunmoon": {
-    "showSun":  true,
+    "showSun": true,
     "showMoon": true
   }
 

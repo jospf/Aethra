@@ -150,6 +150,48 @@ def starlink():
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
+from skyfield import almanac
+
+from skyfield import almanac
+
+@app.route('/moon')
+def moon_info():
+    try:
+        t = ts.now()
+
+        # Subpoint of moon
+        moon_astrometric = earth.at(t).observe(moon).apparent()
+        subpoint = wgs84.subpoint(moon_astrometric)
+
+        # Phase and illumination
+        phase_angle = almanac.moon_phase(eph, t).degrees
+        illumination = almanac.fraction_illuminated(eph, 'moon', t)
+
+        def describe_phase(angle):
+            if angle < 22.5: return "New Moon"
+            elif angle < 67.5: return "Waxing Crescent"
+            elif angle < 112.5: return "First Quarter"
+            elif angle < 157.5: return "Waxing Gibbous"
+            elif angle < 202.5: return "Full Moon"
+            elif angle < 247.5: return "Waning Gibbous"
+            elif angle < 292.5: return "Last Quarter"
+            elif angle < 337.5: return "Waning Crescent"
+            else: return "New Moon"
+
+        return jsonify({
+            "timestamp": t.utc_iso(),
+            "lat": subpoint.latitude.degrees,
+            "lon": subpoint.longitude.degrees,
+            "phase": describe_phase(phase_angle),
+            "illumination": round(illumination * 100, 1)
+        })
+
+    except Exception as e:
+        print("❌ /moon route error:")
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

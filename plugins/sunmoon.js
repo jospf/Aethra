@@ -1,109 +1,107 @@
 export default async function initSunMoon(map) {
   const DEBUG = true;
-  if (DEBUG) console.log("\ud83c\udf1e sunmoon plugin loaded");
+  console.log("🌞 sunmoon plugin loaded");
 
-  const configResponse = await fetch('./config.json');
-  const fullConfig = await configResponse.json();
-  const defaultConfig = { showSun: true, showMoon: true };
-  const pluginConfig = { ...defaultConfig, ...(fullConfig.sunmoon || {}) };
-
-  const iconSize = 1.1;
-  const bodies = [];
-  if (pluginConfig.showSun === true) bodies.push('sun');
-  if (pluginConfig.showMoon === true) bodies.push('moon');
-
-  const sources = {
-    sun: 'sun-position',
-    moon: 'moon-position'
-  };
-
-  const layers = {
-    sunIcon: 'sun-symbol',
-    moonIcon: 'moon-symbol'
-  };
-
-  function updatePositions() {
-    if (DEBUG) console.log("\ud83d\udd01 updatePositions() called");
-
-    fetch("http://localhost:5000/subpoints")
-      .then(res => res.json())
-      .then(data => {
-        const subpoints = {
-          sun: [data.sun.lon, data.sun.lat],
-          moon: [data.moon.lon, data.moon.lat]
-        };
-
-        bodies.forEach(body => {
-          const coord = subpoints[body];
-          if (DEBUG) console.log(`\ud83d\ude80 Updating ${body} position:`, coord);
-
-          map.getSource(sources[body]).setData({
-            type: 'FeatureCollection',
-            features: [{
-              type: 'Feature',
-              geometry: { type: 'Point', coordinates: coord },
-              properties: {}
-            }]
-          });
-        });
-      })
-      .catch(err => {
-        console.error("\u274c Failed to fetch subpoints:", err);
-      });
+  // Load plugin configuration
+  let showSun = true;
+  let showMoon = true;
+  try {
+    const conf = await fetch("./config.json").then(r => r.json());
+    if (conf.sunmoon) {
+      showSun = conf.sunmoon.showSun !== false;
+      showMoon = conf.sunmoon.showMoon !== false;
+    }
+  } catch (err) {
+    console.warn('⚠️ sunmoon config missing or invalid, using defaults', err);
   }
 
-  function addSourcesAndLayers() {
-    bodies.forEach(body => {
-      map.addSource(sources[body], {
-        type: 'geojson',
-        data: { type: 'FeatureCollection', features: [] }
-      });
+  // Icon sizes (adjust as needed)
+  const iconSizeSun = 1;
+  const iconSizeMoon = 1;
 
+  // ADD SUN LAYER
+  if (showSun) {
+    try {
+      await new Promise(res => map.loadImage('./assets/sun.png', (e, img) => {
+        if (!e && img) map.addImage('sun-icon', img);
+        res();
+      }));
+      map.addSource('sun-pos', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
       map.addLayer({
-        id: layers[body + 'Icon'],
+        id: 'sun-sym',
         type: 'symbol',
-        source: sources[body],
+        source: 'sun-pos',
         layout: {
-          'icon-image': `${body}-icon`,
-          'icon-size': iconSize,
+          'icon-image': 'sun-icon',
+          'icon-size': iconSizeSun,
           'icon-allow-overlap': true
         }
       });
-    });
-
-    updatePositions();
-    setInterval(updatePositions, 15 * 60 * 1000); // every 15 minutes
-  }
-
-  function loadIconsThenAddLayers() {
-    if (!map.isStyleLoaded()) {
-      if (DEBUG) console.log("\u23f0 Waiting for style to load...");
-      map.once('styledata', loadIconsThenAddLayers);
-      return;
+      if (DEBUG) console.log('✅ Sun layer added');
+    } catch (e) {
+      console.error('❌ Sun init failed', e);
     }
-
-    const loadQueue = bodies.map(body => new Promise((resolve, reject) => {
-      map.loadImage(`./assets/${body}.png`, (err, image) => {
-        if (err || !image) {
-          console.error(`\u274c Could not load ${body} icon`, err);
-          resolve(); // silently continue if file is missing
-        } else {
-          if (!map.hasImage(`${body}-icon`)) {
-            map.addImage(`${body}-icon`, image);
-            if (DEBUG) console.log(`\u2705 ${body}-icon added`);
-          }
-          resolve();
-        }
-      });
-    }));
-
-    Promise.all(loadQueue)
-      .then(() => {
-        if (DEBUG) console.log("\u2705 All icons processed — adding sources and layers");
-        addSourcesAndLayers();
-      })
-      .catch(err => console.error("\u274c Icon load failure", err));
   }
 
-  loadIconsThenAddLayers();
+  // PRELOAD MOON PHASE ICONS AND ADD MOON LAYER
+  const moonPhases = [
+    'new-moon','waxing-crescent','first-quarter','waxing-gibbous',
+    'full-moon','waning-gibbous','last-quarter','waning-crescent'
+  ];
+  if (showMoon) {
+    for (const phase of moonPhases) {
+      const name = `moon-${phase}`;
+      await new Promise(res => map.loadImage(`./assets/moon_phases/${name}.png`, (e, img) => {
+        if (!e && img) map.addImage(name, img);
+        res();
+      }));
+      if (DEBUG) console.log(`✅ Preloaded ${name}`);
+    }
+    map.addSource('moon-pos', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+    map.addLayer({
+      id: 'moon-sym',
+      type: 'symbol',
+      source: 'moon-pos',
+      layout: {
+        'icon-image': 'moon-new-moon',
+        'icon-size': iconSizeMoon,
+        'icon-allow-overlap': true
+      }
+    });
+    if (DEBUG) console.log('✅ Moon layer added');
+  }
+
+  // UPDATE FUNCTION
+  async function updatePositions() {
+    if (showSun) {
+      try {
+        const sp = await fetch('http://localhost:5000/subpoints').then(r => r.json());
+        map.getSource('sun-pos').setData({
+          type: 'FeatureCollection',
+          features: [{ type: 'Feature', geometry: { type: 'Point', coordinates: [sp.sun.lon, sp.sun.lat] } }]
+        });
+      } catch (e) {
+        console.error('❌ Sun update failed', e);
+      }
+    }
+    if (showMoon) {
+      try {
+        const md = await fetch('http://localhost:5000/moon').then(r => r.json());
+        const phaseKey = md.phase.toLowerCase().replace(/\s+/g, '-');
+        const iconName = `moon-${phaseKey}`;
+        map.setLayoutProperty('moon-sym', 'icon-image', iconName);
+        if (DEBUG) console.log(`🌗 Moon phase icon set to ${iconName}`);
+        map.getSource('moon-pos').setData({
+          type: 'FeatureCollection',
+          features: [{ type: 'Feature', geometry: { type: 'Point', coordinates: [md.lon, md.lat] }, properties: { title: `${md.phase} (${md.illumination}%)` } }]
+        });
+      } catch (e) {
+        console.error('❌ Moon update failed', e);
+      }
+    }
+  }
+
+  // INITIAL UPDATE & INTERVAL
+  await updatePositions();
+  setInterval(updatePositions, 60 * 1000);
 }
