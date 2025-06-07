@@ -40,9 +40,6 @@ def subpoints():
         }
     })
 
-ts = load.timescale()
-planets = load('de421.bsp')
-earth, sun = planets['earth'], planets['sun']
 
 
 @app.route('/iss')
@@ -152,7 +149,6 @@ def starlink():
 
 from skyfield import almanac
 
-from skyfield import almanac
 
 @app.route('/moon')
 def moon_info():
