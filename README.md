@@ -89,6 +89,13 @@ Example `config.json`:
 
 ---
 
+## 📚 Documentation
+
+Additional setup information and a short guide to writing plugins can be found
+in [docs/overview.md](docs/overview.md).
+
+---
+
 ## 📂 Project Status
 
 This is an evolving personal project. Core components are in place and plugin development is ongoing. Contributions, suggestions, and feature ideas are welcome.
