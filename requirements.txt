@@ -2,3 +2,5 @@ flask
 skyfield
 flask-cors
 requests
+
+pytest
