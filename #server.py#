@@ -77,7 +77,7 @@ def terminator():
     t = ts.now()
     points = []
 
-    for lon in range(-180, 181, 2):  # Sample every 5°
+    for lon in range(-180, 181, 2):  # Sample every 2°
         lat_min, lat_max = -90, 90
         for _ in range(10):  # Binary search
             lat_mid = (lat_min + lat_max) / 2
