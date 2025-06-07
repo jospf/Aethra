@@ -8,3 +8,8 @@ rm
 aethra-backend/
 *.bsp
 localConfig.json
+__pycache__/
+# Ignore Python bytecode files
+*.pyc
+.vscode/
+.pytest_cache/
