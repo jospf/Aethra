@@ -33,7 +33,10 @@ class DummyLoader:
 def client_server(monkeypatch):
     monkeypatch.setattr('skyfield.api.load', DummyLoader())
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-    server = importlib.import_module('server')
+    backend = importlib.import_module('aethra_backend')
+    routes = importlib.import_module('aethra_backend.routes')
+
+    app = backend.create_app()
 
     def fake_subpoints():
         return jsonify({
@@ -41,15 +44,14 @@ def client_server(monkeypatch):
             "sun": {"lat": 0, "lon": 0},
             "moon": {"lat": 0, "lon": 0}
         })
+
     def fake_terminator():
         return jsonify({"terminator": [], "timestamp": "test"})
 
-    monkeypatch.setattr(server, 'subpoints', fake_subpoints)
-    server.app.view_functions['subpoints'] = fake_subpoints
-    monkeypatch.setattr(server, 'terminator', fake_terminator)
-    server.app.view_functions['terminator'] = fake_terminator
+    app.view_functions['api.subpoints'] = fake_subpoints
+    app.view_functions['api.terminator'] = fake_terminator
 
-    return server.app.test_client(), server
+    return app.test_client(), routes
 
 
 def test_subpoints(client_server):
@@ -80,7 +82,7 @@ def test_terminator(client_server):
 
 
 def test_starlink(client_server, monkeypatch):
-    client, server = client_server
+    client, routes = client_server
 
     sample_tle = "STARLINK-1\n1 00000U 20000A   00000.00000000  .00000000  00000-0  00000-0 0 0001\n2 00000  53.0000 000.0000 0001000 000.0000 000.0000 15.00000000\n"
 
@@ -90,7 +92,7 @@ def test_starlink(client_server, monkeypatch):
         def raise_for_status(self):
             pass
 
-    monkeypatch.setattr(server.requests, 'get', lambda url: MockResponse())
+    monkeypatch.setattr(routes.requests, 'get', lambda url: MockResponse())
 
     resp = client.get('/starlink')
     assert resp.status_code == 200
