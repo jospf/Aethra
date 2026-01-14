@@ -6,16 +6,14 @@ import { createNightPolygon } from '../utils/terminator';
  * Updates every minute
  */
 export function useTerminator() {
-    const [nightPolygon, setNightPolygon] = useState(null);
+    // Calculate initial terminator immediately using lazy initialization
+    const [nightPolygon, setNightPolygon] = useState(() => createNightPolygon(new Date()));
 
     useEffect(() => {
         const updateTerminator = () => {
             const polygon = createNightPolygon(new Date());
             setNightPolygon(polygon);
         };
-
-        // Initial calculation
-        updateTerminator();
 
         // Update every minute
         const interval = setInterval(updateTerminator, 60000);
