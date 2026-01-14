@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from skyfield.api import load, wgs84
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import time
 
 app = FastAPI()
@@ -33,11 +33,32 @@ def get_iss_data():
     subpoint = wgs84.subpoint(geocentric)
     
     # Calculate velocity (crude but effective for display)
-    # Skyfield geocentric.velocity returns AU/day, convert to km/s
-    # 1 AU = 149,597,870.7 km
-    # 1 day = 86,400 seconds
     vel = geocentric.velocity.km_per_s
     speed_kmh = sum(v*v for v in vel)**0.5 * 3600
+
+    # Calculate orbital path (next 90 minutes, 1.5 min steps for ~60 points)
+    segments = []
+    current_segment = []
+    
+    for i in range(0, 91, 2):
+        future_t = ts.from_datetime(datetime.now(timezone.utc) + timedelta(minutes=i))
+        future_pos = tle_data.at(future_t)
+        future_subpoint = wgs84.subpoint(future_pos)
+        
+        lon = future_subpoint.longitude.degrees
+        lat = future_subpoint.latitude.degrees
+        
+        # Detect antimeridian crossing (longitude jump > 180)
+        if current_segment:
+            prev_lon = current_segment[-1][0]
+            if abs(lon - prev_lon) > 180:
+                segments.append(current_segment)
+                current_segment = []
+        
+        current_segment.append([lon, lat])
+    
+    if current_segment:
+        segments.append(current_segment)
 
     return {
         "name": "ISS (ZARYA)",
@@ -45,7 +66,8 @@ def get_iss_data():
         "longitude": subpoint.longitude.degrees,
         "altitude": subpoint.elevation.km,
         "velocity": speed_kmh,
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "path": segments
     }
 
 @app.get("/")

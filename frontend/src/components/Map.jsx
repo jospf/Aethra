@@ -63,43 +63,73 @@ export default function Map({ issData }) {
                 }
             });
 
-            // ISS Marker Layer
+            // ISS Orbital Path Source (MultiLineString for segments)
+            map.current.addSource('iss-path', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+
+            // ISS Orbital Path Layer
+            map.current.addLayer({
+                id: 'iss-path-layer',
+                type: 'line',
+                source: 'iss-path',
+                layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                paint: {
+                    'line-color': '#3b82f6',
+                    'line-width': 2,
+                    'line-opacity': 0.6,
+                    'line-dasharray': [2, 1]
+                }
+            });
+
+            // ISS Source (Reusable for marker and glow)
             map.current.addSource('iss', {
                 type: 'geojson',
                 data: { type: 'FeatureCollection', features: [] }
             });
 
-            // Glow for ISS
+            // ISS Glow Layer (Simple point glow)
             map.current.addLayer({
                 id: 'iss-glow',
                 type: 'circle',
                 source: 'iss',
                 paint: {
                     'circle-radius': 12,
-                    'circle-color': '#3b82f6',
-                    'circle-opacity': 0.3,
-                    'circle-blur': 1
+                    'circle-color': '#ffffff',
+                    'circle-blur': 1,
+                    'circle-opacity': 0.6
                 }
             });
 
-            map.current.addLayer({
-                id: 'iss-layer',
-                type: 'circle',
-                source: 'iss',
-                paint: {
-                    'circle-radius': 5,
-                    'circle-color': '#fff',
-                    'circle-stroke-width': 2,
-                    'circle-stroke-color': '#3b82f6'
+            // Load ISS Icon
+            map.current.loadImage('/assets/iss.png', (error, image) => {
+                if (error) {
+                    console.error('Error loading ISS icon:', error);
+                    return;
+                }
+                if (!map.current.hasImage('iss-icon')) {
+                    map.current.addImage('iss-icon', image);
+                }
+
+                // Add ISS symbol layer AFTER icon is loaded
+                if (!map.current.getLayer('iss-layer')) {
+                    map.current.addLayer({
+                        id: 'iss-layer',
+                        type: 'symbol',
+                        source: 'iss',
+                        layout: {
+                            'icon-image': 'iss-icon',
+                            'icon-size': 0.6,
+                            'icon-allow-overlap': true,
+                            'icon-anchor': 'center'
+                        }
+                    });
                 }
             });
-
-            if (nightPolygon) {
-                map.current.getSource('night').setData({
-                    type: 'FeatureCollection',
-                    features: [nightPolygon]
-                });
-            }
         });
 
     }, [lng, lat, zoom]);
@@ -113,24 +143,33 @@ export default function Map({ issData }) {
         }
     }, [nightPolygon]);
 
-    // Update ISS position
+    // Update ISS position and path
     useEffect(() => {
-        if (map.current && issData && map.current.getSource('iss')) {
-            map.current.getSource('iss').setData({
-                type: 'FeatureCollection',
-                features: [{
+        if (map.current && issData) {
+            // Update ISS Marker Source
+            if (map.current.getSource('iss')) {
+                map.current.getSource('iss').setData({
+                    type: 'Point',
+                    coordinates: [issData.longitude, issData.latitude]
+                });
+            }
+
+            // Update ISS Path Source (Handle segments)
+            if (issData.path && map.current.getSource('iss-path')) {
+                map.current.getSource('iss-path').setData({
                     type: 'Feature',
                     geometry: {
-                        type: 'Point',
-                        coordinates: [issData.longitude, issData.latitude]
-                    }
-                }]
-            });
+                        type: 'MultiLineString',
+                        coordinates: issData.path
+                    },
+                    properties: {}
+                });
+            }
         }
     }, [issData]);
 
     return (
-        <div className="map-wrap absolute inset-0 w-full h-full">
+        <div className="map-wrap absolute inset-0 w-full h-full bg-[#0b0e14]">
             <div ref={mapContainer} className="map w-full h-full" />
         </div>
     );
