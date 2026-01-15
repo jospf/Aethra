@@ -2,10 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useTerminator } from '../hooks/useTerminator';
+import { useWeather } from '../hooks/useWeather';
 
 export default function Map({
     mapStyle = 'satellite',
     layers = { night: true, moon: true, iss: true },
+    weatherLayers = { precipitation: false, clouds: false, temperature: false },
     moonData,
     issData,
     focusLocation
@@ -17,6 +19,7 @@ export default function Map({
     const [zoom] = useState(1.5); // Start zoomed out for global view
     const [isMapLoaded, setIsMapLoaded] = useState(false);
     const nightPolygon = useTerminator();
+    const { radarPath } = useWeather();
 
     // Handle FlyTo Focus
     useEffect(() => {
@@ -224,7 +227,7 @@ export default function Map({
 
 
 
-            // 3. ISS LAYER
+            // 4. ISS LAYER
             map.current.addSource('iss', {
                 type: 'geojson',
                 data: { type: 'FeatureCollection', features: [] }
@@ -295,6 +298,37 @@ export default function Map({
         }
     }, [moonData, isMapLoaded]);
 
+    // Update RainViewer Data (Precipitation)
+    useEffect(() => {
+        if (map.current && radarPath && isMapLoaded) {
+            const tileUrl = `https://tilecache.rainviewer.com${radarPath}/512/{z}/{x}/{y}/2/1_1.png`;
+
+            if (map.current.getSource('rainviewer')) {
+                // Update existing source tiles
+                // MapLibre doesn't support updating raster tiles directly easily without removing/adding or custom implementation
+                // Alternatively, we can use setStyle or similar, but removing/adding source is safer for dynamic raster URLs
+                if (map.current.getLayer('rain-layer')) map.current.removeLayer('rain-layer');
+                map.current.removeSource('rainviewer');
+            }
+
+            map.current.addSource('rainviewer', {
+                type: 'raster',
+                tiles: [tileUrl],
+                tileSize: 256
+            });
+
+            map.current.addLayer({
+                id: 'rain-layer',
+                type: 'raster',
+                source: 'rainviewer',
+                minzoom: 0,
+                maxzoom: 18,
+                layout: { visibility: 'none' }, // Default to none, let main effect handle it
+                paint: { 'raster-opacity': 0.8 }
+            }, 'moon-glow'); // Place before moon/iss but after base map
+        }
+    }, [radarPath, isMapLoaded]); // Only re-run if path changes
+
     // Update ISS Data
     useEffect(() => {
         if (map.current && issData && map.current.getSource('iss')) {
@@ -334,7 +368,12 @@ export default function Map({
         setVisibility('moon-glow', layers.moon);
         setVisibility('iss-layer', layers.iss);
 
-    }, [layers, mapStyle, moonData, isMapLoaded]);
+        // Weather
+        if (map.current.getLayer('rain-layer')) {
+            setVisibility('rain-layer', weatherLayers.precipitation);
+        }
+
+    }, [layers, mapStyle, moonData, isMapLoaded, weatherLayers]);
 
     return (
         <div className="map-wrap absolute inset-0 w-full h-full bg-[#0b0e14]">

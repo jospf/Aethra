@@ -12,12 +12,24 @@ function App() {
         moon: true,
         iss: false
     });
+    const [weatherLayers, setWeatherLayers] = useState({
+        precipitation: false,
+        clouds: false,
+        temperature: false
+    });
     const [focusLocation, setFocusLocation] = useState(null);
     const { moonData } = useMoon();
     const issData = useISS();
 
     const toggleLayer = (layer) => {
         setLayers(prev => ({
+            ...prev,
+            [layer]: !prev[layer]
+        }));
+    };
+
+    const toggleWeatherLayer = (layer) => {
+        setWeatherLayers(prev => ({
             ...prev,
             [layer]: !prev[layer]
         }));
@@ -57,6 +69,7 @@ function App() {
                 <Map
                     mapStyle={mapStyle}
                     layers={layers}
+                    weatherLayers={weatherLayers}
                     moonData={moonData}
                     issData={issData}
                     focusLocation={focusLocation}
@@ -69,6 +82,8 @@ function App() {
                 onStyleChange={setMapStyle}
                 layers={layers}
                 toggleLayer={toggleLayer}
+                weatherLayers={weatherLayers}
+                toggleWeatherLayer={toggleWeatherLayer}
                 moonData={moonData}
                 issData={issData}
                 onLocate={handleLocate}
