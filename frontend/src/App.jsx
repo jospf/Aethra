@@ -14,6 +14,9 @@ function App() {
     });
     const [weatherLayers, setWeatherLayers] = useState({
         precipitation: false,
+        aurora: false,
+        earthquakes: false,
+        volcanoes: false,
         clouds: false,
         temperature: false
     });

@@ -154,6 +154,55 @@ export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, 
                 </div>
 
                 <div className="mt-6 pt-6 border-t border-white/10">
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent mb-6">
+                        Space Weather
+                    </h2>
+
+                    <div className="space-y-6">
+                        {/* Aurora Toggle */}
+                        <div className="flex items-center justify-between">
+                            <span className="text-gray-300 font-medium tracking-wide">Aurora Forecast</span>
+                            <button
+                                onClick={() => toggleWeatherLayer('aurora')}
+                                className={`w-12 h-6 rounded-full transition-colors relative ${weatherLayers.aurora ? 'bg-indigo-500' : 'bg-gray-700'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${weatherLayers.aurora ? 'translate-x-6' : 'translate-x-0'}`} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-white/10">
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent mb-6">
+                        Geological Events
+                    </h2>
+
+                    <div className="space-y-6">
+                        {/* Earthquakes Toggle */}
+                        <div className="flex items-center justify-between">
+                            <span className="text-gray-300 font-medium tracking-wide">Earthquakes (M2.5+)</span>
+                            <button
+                                onClick={() => toggleWeatherLayer('earthquakes')}
+                                className={`w-12 h-6 rounded-full transition-colors relative ${weatherLayers.earthquakes ? 'bg-orange-500' : 'bg-gray-700'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${weatherLayers.earthquakes ? 'translate-x-6' : 'translate-x-0'}`} />
+                            </button>
+                        </div>
+
+                        {/* Volcanoes Toggle */}
+                        <div className="flex items-center justify-between">
+                            <span className="text-gray-300 font-medium tracking-wide">Active Volcanoes</span>
+                            <button
+                                onClick={() => toggleWeatherLayer('volcanoes')}
+                                className={`w-12 h-6 rounded-full transition-colors relative ${weatherLayers.volcanoes ? 'bg-red-500' : 'bg-gray-700'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${weatherLayers.volcanoes ? 'translate-x-6' : 'translate-x-0'}`} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-white/10">
                     <h2 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent mb-6">
                         Clock Control
                     </h2>

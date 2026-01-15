@@ -3,6 +3,9 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useTerminator } from '../hooks/useTerminator';
 import { useWeather } from '../hooks/useWeather';
+import { useAurora } from '../hooks/useAurora';
+import { useEarthquakes } from '../hooks/useEarthquakes';
+import { useVolcanoes } from '../hooks/useVolcanoes';
 
 export default function Map({
     mapStyle = 'satellite',
@@ -20,6 +23,9 @@ export default function Map({
     const [isMapLoaded, setIsMapLoaded] = useState(false);
     const nightPolygon = useTerminator();
     const { radarPath } = useWeather();
+    const { auroraData } = useAurora();
+    const { earthquakeData } = useEarthquakes();
+    const { volcanoData } = useVolcanoes();
 
     // Handle FlyTo Focus
     useEffect(() => {
@@ -131,6 +137,148 @@ export default function Map({
                 paint: {
                     'fill-color': '#000000',
                     'fill-opacity': 0.5
+                }
+            });
+
+            // 5. AURORA LAYER (Heatmap)
+            map.current.addSource('aurora', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+
+            map.current.addLayer({
+                id: 'aurora-layer',
+                type: 'heatmap',
+                source: 'aurora',
+                maxzoom: 9,
+                paint: {
+                    // Start low weight
+                    'heatmap-weight': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', 'intensity'],
+                        0, 0,
+                        100, 1
+                    ],
+                    // Increase intensity as zoom level increases
+                    'heatmap-intensity': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        0, 1,
+                        9, 3
+                    ],
+                    // Color ramp for aurora (Green -> Teal -> Purple -> Red)
+                    'heatmap-color': [
+                        'interpolate',
+                        ['linear'],
+                        ['heatmap-density'],
+                        0, 'rgba(0,0,0,0)',
+                        0.2, 'rgba(0, 255, 128, 0.5)', // Green
+                        0.4, 'rgba(0, 255, 255, 0.6)', // Cyan
+                        0.6, 'rgba(0, 128, 255, 0.7)', // Blue
+                        0.8, 'rgba(128, 0, 255, 0.8)', // Purple
+                        1, 'rgba(255, 0, 128, 0.9)'  // Red/Pink
+                    ],
+                    // Adjust radius by zoom level
+                    'heatmap-radius': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        0, 5,
+                        9, 20
+                    ],
+                    // Transition from heatmap to circle layer by zoom level
+                    'heatmap-opacity': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        7, 1,
+                        9, 0
+                    ],
+                },
+                layout: {
+                    'visibility': 'none'
+                }
+            });
+
+            // 6. EARTHQUAKES LAYER
+            map.current.addSource('earthquakes', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+
+            map.current.addLayer({
+                id: 'earthquakes-layer',
+                type: 'circle',
+                source: 'earthquakes',
+                paint: {
+                    'circle-radius': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', 'mag'],
+                        2, 2,
+                        6, 8,
+                        8, 15
+                    ],
+                    'circle-color': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', 'mag'],
+                        2, '#fb923c', // Orange-400
+                        5, '#ef4444', // Red-500
+                        7, '#b91c1c'  // Red-700
+                    ],
+                    'circle-opacity': 0.7,
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': '#fff'
+                },
+                layout: {
+                    'visibility': 'none'
+                }
+            });
+
+            // 7. VOLCANOES LAYER
+            map.current.addSource('volcanoes', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+
+            // Generate Red Triangle Icon
+            const width = 24;
+            const height = 24;
+            const img = new Image(width, height);
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+
+            // Draw Triangle
+            ctx.fillStyle = '#dc2626'; // Red-600
+            ctx.strokeStyle = '#7f1d1d'; // Red-900 (Border)
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(width / 2, 2); // Top
+            ctx.lineTo(width - 2, height - 2); // Bottom Right
+            ctx.lineTo(2, height - 2); // Bottom Left
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            const imageData = ctx.getImageData(0, 0, width, height);
+            if (!map.current.hasImage('volcano-icon')) {
+                map.current.addImage('volcano-icon', imageData);
+            }
+
+            map.current.addLayer({
+                id: 'volcanoes-layer',
+                type: 'symbol',
+                source: 'volcanoes',
+                layout: {
+                    'icon-image': 'volcano-icon',
+                    'icon-size': 0.8,
+                    'icon-allow-overlap': true,
+                    'visibility': 'none'
                 }
             });
 
@@ -346,6 +494,27 @@ export default function Map({
         }
     }, [issData, isMapLoaded]);
 
+    // Update Aurora Data
+    useEffect(() => {
+        if (map.current && auroraData && map.current.getSource('aurora')) {
+            map.current.getSource('aurora').setData(auroraData);
+        }
+    }, [auroraData, isMapLoaded]);
+
+    // Update Earthquake Data
+    useEffect(() => {
+        if (map.current && earthquakeData && map.current.getSource('earthquakes')) {
+            map.current.getSource('earthquakes').setData(earthquakeData);
+        }
+    }, [earthquakeData, isMapLoaded]);
+
+    // Update Volcano Data
+    useEffect(() => {
+        if (map.current && volcanoData && map.current.getSource('volcanoes')) {
+            map.current.getSource('volcanoes').setData(volcanoData);
+        }
+    }, [volcanoData, isMapLoaded]);
+
     // Handle Layer Toggles
     useEffect(() => {
         if (!map.current) return;
@@ -371,6 +540,19 @@ export default function Map({
         // Weather
         if (map.current.getLayer('rain-layer')) {
             setVisibility('rain-layer', weatherLayers.precipitation);
+        }
+
+        // Space Weather
+        if (map.current.getLayer('aurora-layer')) {
+            setVisibility('aurora-layer', weatherLayers.aurora);
+        }
+
+        // Geological
+        if (map.current.getLayer('earthquakes-layer')) {
+            setVisibility('earthquakes-layer', weatherLayers.earthquakes);
+        }
+        if (map.current.getLayer('volcanoes-layer')) {
+            setVisibility('volcanoes-layer', weatherLayers.volcanoes);
         }
 
     }, [layers, mapStyle, moonData, isMapLoaded, weatherLayers]);
