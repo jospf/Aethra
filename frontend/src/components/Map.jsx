@@ -69,6 +69,23 @@ export default function Map({ issData }) {
                 data: { type: 'FeatureCollection', features: [] }
             });
 
+            // ISS Orbital Path Layer (Glow)
+            map.current.addLayer({
+                id: 'iss-path-glow',
+                type: 'line',
+                source: 'iss-path',
+                layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                paint: {
+                    'line-color': '#3b82f6',
+                    'line-width': 4,
+                    'line-opacity': 0.2,
+                    'line-blur': 2
+                }
+            });
+
             // ISS Orbital Path Layer
             map.current.addLayer({
                 id: 'iss-path-layer',
@@ -82,7 +99,7 @@ export default function Map({ issData }) {
                     'line-color': '#3b82f6',
                     'line-width': 2,
                     'line-dasharray': [2, 1],
-                    'line-opacity': 0.6
+                    'line-opacity': 0.8
                 }
             });
 
@@ -166,7 +183,7 @@ export default function Map({ issData }) {
                     features: [{
                         type: 'Feature',
                         geometry: {
-                            type: 'LineString',
+                            type: 'MultiLineString',
                             coordinates: issData.path
                         },
                         properties: {}
