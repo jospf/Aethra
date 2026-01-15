@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { AVAILABLE_TIMEZONES } from '../../utils/timezones';
 
-export default function Sidebar({ layers, toggleLayer, moonData, issData, onLocate }) {
+export default function Sidebar({ layers, toggleLayer, moonData, issData, onLocate, clockSettings, toggleClockSetting, toggleTimezone }) {
+
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -115,6 +117,44 @@ export default function Sidebar({ layers, toggleLayer, moonData, issData, onLoca
                                     LOCATE STATION
                                 </button>
                             )}
+                        </div>
+                    </div>
+
+                    <div className="mt-6 pt-6 border-t border-white/10">
+                        <h2 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent mb-6">
+                            Clock Control
+                        </h2>
+
+                        <div className="space-y-6">
+                            {/* Stardate Toggle */}
+                            <div className="flex items-center justify-between">
+                                <span className="text-gray-300 font-medium tracking-wide">Show Stardate</span>
+                                <button
+                                    onClick={() => toggleClockSetting('showStardate')}
+                                    className={`w-12 h-6 rounded-full transition-colors relative ${clockSettings?.showStardate ? 'bg-purple-500' : 'bg-gray-700'}`}
+                                >
+                                    <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${clockSettings?.showStardate ? 'translate-x-6' : 'translate-x-0'}`} />
+                                </button>
+                            </div>
+
+                            {/* Timezones List */}
+                            <div className="space-y-3">
+                                <span className="text-xs text-gray-500 uppercase tracking-widest font-bold">Active Timezones</span>
+                                {AVAILABLE_TIMEZONES.map((tz) => {
+                                    const isActive = clockSettings?.activeTimezones.includes(tz.tz);
+                                    return (
+                                        <div key={tz.tz} className="flex items-center justify-between">
+                                            <span className="text-gray-400 text-sm font-mono">{tz.label}</span>
+                                            <button
+                                                onClick={() => toggleTimezone(tz.tz)}
+                                                className={`w-8 h-4 rounded-full transition-colors relative ${isActive ? 'bg-purple-500/50' : 'bg-gray-700'}`}
+                                            >
+                                                <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isActive ? 'translate-x-4' : 'translate-x-0'}`} />
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
 

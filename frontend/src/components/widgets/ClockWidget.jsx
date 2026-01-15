@@ -27,7 +27,11 @@ const TimezoneClock = ({ tz, label }) => {
     );
 };
 
-export const ClockWidget = () => {
+import { AVAILABLE_TIMEZONES } from '../../utils/timezones';
+
+// ... (TimezoneClock component remains the same)
+
+export const ClockWidget = ({ settings }) => {
     const [stardate, setStardate] = useState(calculateStardate());
 
     useEffect(() => {
@@ -35,34 +39,37 @@ export const ClockWidget = () => {
         return () => clearInterval(timer);
     }, []);
 
-    const timezones = [
-        { tz: 'UTC', label: 'UTC' },
-        { tz: 'America/New_York', label: 'NYC' },
-        { tz: 'America/Los_Angeles', label: 'LAX' },
-        { tz: 'Europe/London', label: 'LON' },
-        { tz: 'Asia/Tokyo', label: 'TYO' },
-        { tz: 'Australia/Sydney', label: 'SYD' }
-    ];
+    // Default to showing everything if settings aren't provided yet
+    const showStardate = settings?.showStardate ?? true;
+    const activeTimezones = settings?.activeTimezones ?? AVAILABLE_TIMEZONES.map(t => t.tz);
+
+    const visibleTimezones = AVAILABLE_TIMEZONES.filter(tz => activeTimezones.includes(tz.tz));
+
+    if (!showStardate && visibleTimezones.length === 0) return null;
 
     return (
         <div className="flex flex-col space-y-4 w-full">
             {/* Top Banner (Stardate) */}
-            <div className="flex justify-center">
-                <div className="bg-gray-900/60 backdrop-blur-xl border border-white/10 px-6 py-2 rounded-full shadow-2xl">
-                    <span className="text-sm font-mono tracking-[0.3em] text-purple-400 uppercase">
-                        Stardate <span className="text-white">{stardate}</span>
-                    </span>
+            {showStardate && (
+                <div className="flex justify-center">
+                    <div className="bg-gray-900/60 backdrop-blur-xl border border-white/10 px-6 py-2 rounded-full shadow-2xl">
+                        <span className="text-sm font-mono tracking-[0.3em] text-purple-400 uppercase">
+                            Stardate <span className="text-white">{stardate}</span>
+                        </span>
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Clock Rows */}
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-2 w-full max-w-4xl mx-auto">
-                {timezones.map((tz) => (
-                    <div key={tz.tz} className="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl p-2 hover:bg-gray-900/60 transition-all duration-300">
-                        <TimezoneClock tz={tz.tz} label={tz.label} />
-                    </div>
-                ))}
-            </div>
+            {visibleTimezones.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-2 w-full max-w-4xl mx-auto">
+                    {visibleTimezones.map((tz) => (
+                        <div key={tz.tz} className="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl p-2 hover:bg-gray-900/60 transition-all duration-300">
+                            <TimezoneClock tz={tz.tz} label={tz.label} />
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };

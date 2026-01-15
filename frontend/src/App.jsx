@@ -23,6 +23,29 @@ function App() {
         }));
     };
 
+    const [clockSettings, setClockSettings] = useState({
+        showStardate: true,
+        activeTimezones: ['UTC', 'America/New_York', 'America/Los_Angeles', 'Europe/London', 'Asia/Tokyo', 'Australia/Sydney']
+    });
+
+    const toggleClockSetting = (setting) => {
+        setClockSettings(prev => ({
+            ...prev,
+            [setting]: !prev[setting]
+        }));
+    };
+
+    const toggleTimezone = (tz) => {
+        setClockSettings(prev => {
+            const active = prev.activeTimezones;
+            if (active.includes(tz)) {
+                return { ...prev, activeTimezones: active.filter(t => t !== tz) };
+            } else {
+                return { ...prev, activeTimezones: [...active, tz] };
+            }
+        });
+    };
+
     const handleLocate = (lat, lon) => {
         setFocusLocation({ lat, lon, timestamp: Date.now() });
     };
@@ -46,6 +69,9 @@ function App() {
                 moonData={moonData}
                 issData={issData}
                 onLocate={handleLocate}
+                clockSettings={clockSettings}
+                toggleClockSetting={toggleClockSetting}
+                toggleTimezone={toggleTimezone}
             />
 
             {/* Header Overlay */}
@@ -67,7 +93,7 @@ function App() {
 
                 {/* Clock Widgets */}
                 <div className="absolute left-1/2 -translate-x-1/2 pointer-events-auto">
-                    <ClockWidget />
+                    <ClockWidget settings={clockSettings} />
                 </div>
             </header>
 
