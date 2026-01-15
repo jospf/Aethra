@@ -92,16 +92,16 @@ export default function Map({ issData }) {
                 data: { type: 'FeatureCollection', features: [] }
             });
 
-            // ISS Glow Layer (Simple point glow)
+            // ISS Glow Layer (Refined to be a tighter backing glow)
             map.current.addLayer({
                 id: 'iss-glow',
                 type: 'circle',
                 source: 'iss',
                 paint: {
-                    'circle-radius': 12,
+                    'circle-radius': 15,
                     'circle-color': '#ffffff',
-                    'circle-blur': 1,
-                    'circle-opacity': 0.6
+                    'circle-blur': 0.8,
+                    'circle-opacity': 0.4
                 }
             });
 
@@ -123,7 +123,7 @@ export default function Map({ issData }) {
                         source: 'iss',
                         layout: {
                             'icon-image': 'iss-icon',
-                            'icon-size': 0.6,
+                            'icon-size': 2.5,
                             'icon-allow-overlap': true,
                             'icon-anchor': 'center'
                         }
@@ -149,8 +149,14 @@ export default function Map({ issData }) {
             // Update ISS Marker Source
             if (map.current.getSource('iss')) {
                 map.current.getSource('iss').setData({
-                    type: 'Point',
-                    coordinates: [issData.longitude, issData.latitude]
+                    type: 'FeatureCollection',
+                    features: [{
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Point',
+                            coordinates: [issData.longitude, issData.latitude]
+                        }
+                    }]
                 });
             }
 
