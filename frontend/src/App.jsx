@@ -1,14 +1,48 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Map from './components/Map'
 import { ClockWidget } from './components/widgets/ClockWidget'
+import { useMoon } from './hooks/useMoon';
+
+import Sidebar from './components/ui/Sidebar';
 
 function App() {
+    const [layers, setLayers] = useState({
+        satellite: true,
+        night: true,
+        moon: true
+    });
+    const [focusLocation, setFocusLocation] = useState(null);
+    const { moonData } = useMoon();
+
+    const toggleLayer = (layer) => {
+        setLayers(prev => ({
+            ...prev,
+            [layer]: !prev[layer]
+        }));
+    };
+
+    const handleLocate = (lat, lon) => {
+        setFocusLocation({ lat, lon, timestamp: Date.now() });
+    };
+
     return (
         <div className="relative w-screen h-screen overflow-hidden selection:bg-cyan-500/30">
             {/* Map Background */}
             <div className="absolute inset-0 z-0">
-                <Map />
+                <Map
+                    layers={layers}
+                    moonData={moonData}
+                    focusLocation={focusLocation}
+                />
             </div>
+
+            {/* Sidebar */}
+            <Sidebar
+                layers={layers}
+                toggleLayer={toggleLayer}
+                moonData={moonData}
+                onLocate={handleLocate}
+            />
 
             {/* Header Overlay */}
             <header className="absolute top-0 left-0 w-full z-10 p-6 flex justify-between items-start pointer-events-none">

@@ -1,86 +1,74 @@
 from fastapi import FastAPI
 from skyfield.api import load, wgs84
-from datetime import datetime, timezone, timedelta
-import time
+from skyfield import almanac
+from datetime import datetime, timezone
 
 app = FastAPI()
 
-# Global variables for TLE caching
-tle_data = None
-last_tle_update = 0
-TLE_CACHE_TTL = 3600  # 1 hour
-
-def get_iss_data():
-    global tle_data, last_tle_update
-    
-    now = time.time()
-    # Refresh TLE if cache is old or empty
-    if not tle_data or (now - last_tle_update) > TLE_CACHE_TTL:
-        try:
-            stations_url = 'https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=tle'
-            satellites = load.tle_file(stations_url)
-            by_name = {sat.name: sat for sat in satellites}
-            tle_data = by_name['ISS (ZARYA)']
-            last_tle_update = now
-        except Exception as e:
-            if not tle_data:
-                raise e
-            # If fetch fails but we have old data, keep using it
-
-    ts = load.timescale()
-    t = ts.now()
-    geocentric = tle_data.at(t)
-    subpoint = wgs84.subpoint(geocentric)
-    
-    # Calculate velocity (crude but effective for display)
-    vel = geocentric.velocity.km_per_s
-    speed_kmh = sum(v*v for v in vel)**0.5 * 3600
-
-    # Calculate orbital path (next 90 minutes, 1.5 min steps for ~60 points)
-    segments = []
-    current_segment = []
-    
-    for i in range(0, 91, 2):
-        future_t = ts.from_datetime(datetime.now(timezone.utc) + timedelta(minutes=i))
-        future_pos = tle_data.at(future_t)
-        future_subpoint = wgs84.subpoint(future_pos)
-        
-        lon = future_subpoint.longitude.degrees
-        lat = future_subpoint.latitude.degrees
-        
-        # Detect antimeridian crossing (longitude jump > 180)
-        if current_segment:
-            prev_lon = current_segment[-1][0]
-            if abs(lon - prev_lon) > 180:
-                segments.append(current_segment)
-                current_segment = []
-        
-        current_segment.append([lon, lat])
-    
-    if current_segment:
-        segments.append(current_segment)
-
-    return {
-        "name": "ISS (ZARYA)",
-        "latitude": subpoint.latitude.degrees,
-        "longitude": subpoint.longitude.degrees,
-        "altitude": subpoint.elevation.km,
-        "velocity": speed_kmh,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "path": segments
-    }
+# Initialize Skyfield
+# This will download the file if not present, which might take a moment on first run.
+ts = load.timescale()
+ephemeris = load('de421.bsp')
+moon = ephemeris['moon']
+earth = ephemeris['earth']
+sun = ephemeris['sun']
 
 @app.get("/")
 def read_root():
     return {"message": "Aethra Backend Online"}
 
-@app.get("/api/status")
-def status():
-    return {"status": "ok", "version": "2.0.0"}
+@app.get("/api/health")
+def health_check():
+    return {"status": "healthy"}
 
-@app.get("/api/iss")
-def get_iss():
-    try:
-        return get_iss_data()
-    except Exception as e:
-        return {"error": str(e)}, 500
+@app.get("/api/moon")
+def get_moon_data():
+    t = ts.now()
+    
+    # Position
+    astrometric = earth.at(t).observe(moon)
+    subpoint = wgs84.subpoint(astrometric)
+    
+    # Phase calculation
+    # Calculate phase angle to determine the correct image
+    e = earth.at(t)
+    
+    # Use ecliptic frame for phase angle calculation
+    from skyfield.framelib import ecliptic_frame
+    _, sun_lon, _ = e.observe(sun).apparent().frame_latlon(ecliptic_frame)
+    _, moon_lon, _ = e.observe(moon).apparent().frame_latlon(ecliptic_frame)
+    
+    phase_angle = (moon_lon.degrees - sun_lon.degrees) % 360.0
+    
+    # Map angle to 8 phases
+    # 0 = New, 90 = First Quarter, 180 = Full, 270 = Last Quarter
+    # Segments are centered on these:
+    # New: 337.5 - 22.5
+    # Waxing Crescent: 22.5 - 67.5
+    # First Quarter: 67.5 - 112.5
+    # ...
+    
+    phase_idx = int((phase_angle + 22.5) / 45.0) % 8
+    
+    phases = [
+        "moon-new-moon",       # 0
+        "moon-waxing-crescent",# 1
+        "moon-first-quarter",  # 2
+        "moon-waxing-gibbous", # 3
+        "moon-full-moon",      # 4
+        "moon-waning-gibbous", # 5
+        "moon-last-quarter",   # 6
+        "moon-waning-crescent" # 7
+    ]
+    phase_name = phases[phase_idx]
+    
+    # Fraction illuminated
+    percent = almanac.fraction_illuminated(ephemeris, 'moon', t)
+
+    return {
+        "latitude": subpoint.latitude.degrees,
+        "longitude": subpoint.longitude.degrees,
+        "phase_name": phase_name,
+        "illumination": percent,
+        "phase_angle": phase_angle
+    }
