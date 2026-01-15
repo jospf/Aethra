@@ -4,8 +4,9 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { useTerminator } from '../hooks/useTerminator';
 
 export default function Map({
-    layers = { satellite: true, night: true, moon: true },
+    layers = { satellite: true, night: true, moon: true, iss: true },
     moonData,
+    issData,
     focusLocation
 }) {
     const mapContainer = useRef(null);
@@ -168,12 +169,48 @@ export default function Map({
                     } catch (err) {
                         console.error("Error adding moon-layer:", err);
                     }
-                } else {
-                    console.log("moon-layer already exists.");
                 }
             };
 
+
+
+            // 3. ISS LAYER
+            map.current.addSource('iss', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+
             loadMoonImages();
+
+            // Load ISS Image (Native API)
+            const loadISSImage = () => {
+                const img = new Image();
+                const url = '/assets/iss.png';
+                img.onload = () => {
+                    if (!map.current.hasImage('iss-icon')) {
+                        map.current.addImage('iss-icon', img);
+                    }
+                    // Add ISS Layer once image is ready
+                    if (!map.current.getLayer('iss-layer')) {
+                        map.current.addLayer({
+                            id: 'iss-layer',
+                            type: 'symbol',
+                            source: 'iss',
+                            layout: {
+                                'icon-image': 'iss-icon',
+                                'icon-size': 0.6,
+                                'icon-allow-overlap': true,
+                                'visibility': layers.iss ? 'visible' : 'none'
+                            }
+                        });
+                    }
+                };
+                img.onerror = (err) => console.error("Error loading ISS image", err);
+                img.crossOrigin = "Anonymous";
+                img.src = url;
+            };
+            loadISSImage();
+
             setIsMapLoaded(true);
         });
 
@@ -208,6 +245,23 @@ export default function Map({
         }
     }, [moonData, isMapLoaded]);
 
+    // Update ISS Data
+    useEffect(() => {
+        if (map.current && issData && map.current.getSource('iss')) {
+            map.current.getSource('iss').setData({
+                type: 'FeatureCollection',
+                features: [{
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Point',
+                        coordinates: [issData.longitude, issData.latitude]
+                    },
+                    properties: {}
+                }]
+            });
+        }
+    }, [issData, isMapLoaded]);
+
     // Handle Layer Toggles
     useEffect(() => {
         if (!map.current) return;
@@ -222,6 +276,7 @@ export default function Map({
         setVisibility('night-layer', layers.night);
         setVisibility('moon-layer', layers.moon);
         setVisibility('moon-glow', layers.moon);
+        setVisibility('iss-layer', layers.iss);
 
     }, [layers, moonData, isMapLoaded]);
 

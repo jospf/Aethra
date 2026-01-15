@@ -2,17 +2,19 @@ import React, { useState } from 'react'
 import Map from './components/Map'
 import { ClockWidget } from './components/widgets/ClockWidget'
 import { useMoon } from './hooks/useMoon';
-
+import { useISS } from './hooks/useISS';
 import Sidebar from './components/ui/Sidebar';
 
 function App() {
     const [layers, setLayers] = useState({
         satellite: true,
         night: true,
-        moon: true
+        moon: true,
+        iss: false
     });
     const [focusLocation, setFocusLocation] = useState(null);
     const { moonData } = useMoon();
+    const issData = useISS();
 
     const toggleLayer = (layer) => {
         setLayers(prev => ({
@@ -32,6 +34,7 @@ function App() {
                 <Map
                     layers={layers}
                     moonData={moonData}
+                    issData={issData}
                     focusLocation={focusLocation}
                 />
             </div>
@@ -41,6 +44,7 @@ function App() {
                 layers={layers}
                 toggleLayer={toggleLayer}
                 moonData={moonData}
+                issData={issData}
                 onLocate={handleLocate}
             />
 

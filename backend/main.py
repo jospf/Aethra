@@ -72,3 +72,21 @@ def get_moon_data():
         "illumination": percent,
         "phase_angle": phase_angle
     }
+
+@app.get("/api/iss")
+def get_iss_position():
+    # Load ISS TLE data (stations.txt)
+    # Using the cached file or downloading if needed
+    stations_url = 'http://celestrak.org/NORAD/elements/stations.txt'
+    satellites = load.tle_file(stations_url)
+    by_name = {sat.name: sat for sat in satellites}
+    iss = by_name['ISS (ZARYA)']
+
+    t = ts.now()
+    geocentric = iss.at(t)
+    subpoint = wgs84.subpoint(geocentric)
+
+    return {
+        "latitude": subpoint.latitude.degrees,
+        "longitude": subpoint.longitude.degrees
+    }
