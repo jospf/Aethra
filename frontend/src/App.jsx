@@ -6,8 +6,8 @@ import { useISS } from './hooks/useISS';
 import Sidebar from './components/ui/Sidebar';
 
 function App() {
+    const [mapStyle, setMapStyle] = useState('satellite');
     const [layers, setLayers] = useState({
-        satellite: true,
         night: true,
         moon: true,
         iss: false
@@ -55,6 +55,7 @@ function App() {
             {/* Map Background */}
             <div className="absolute inset-0 z-0">
                 <Map
+                    mapStyle={mapStyle}
                     layers={layers}
                     moonData={moonData}
                     issData={issData}
@@ -64,6 +65,8 @@ function App() {
 
             {/* Sidebar */}
             <Sidebar
+                mapStyle={mapStyle}
+                onStyleChange={setMapStyle}
                 layers={layers}
                 toggleLayer={toggleLayer}
                 moonData={moonData}

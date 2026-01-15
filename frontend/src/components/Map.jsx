@@ -4,7 +4,8 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { useTerminator } from '../hooks/useTerminator';
 
 export default function Map({
-    layers = { satellite: true, night: true, moon: true, iss: true },
+    mapStyle = 'satellite',
+    layers = { night: true, moon: true, iss: true },
     moonData,
     issData,
     focusLocation
@@ -44,6 +45,30 @@ export default function Map({
                         ],
                         tileSize: 256,
                         attribution: '© Esri, © USGS, © NOAA'
+                    },
+                    'dark': {
+                        type: 'raster',
+                        tiles: [
+                            'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                        ],
+                        tileSize: 256,
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    },
+                    'light': {
+                        type: 'raster',
+                        tiles: [
+                            'https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
+                        ],
+                        tileSize: 256,
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    },
+                    'grey': {
+                        type: 'raster',
+                        tiles: [
+                            'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+                        ],
+                        tileSize: 256,
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
                     }
                 },
                 layers: [
@@ -52,7 +77,32 @@ export default function Map({
                         type: 'raster',
                         source: 'satellite',
                         minzoom: 0,
-                        maxzoom: 19
+                        maxzoom: 19,
+                        layout: { visibility: 'visible' }
+                    },
+                    {
+                        id: 'dark-layer',
+                        type: 'raster',
+                        source: 'dark',
+                        minzoom: 0,
+                        maxzoom: 19,
+                        layout: { visibility: 'none' }
+                    },
+                    {
+                        id: 'light-layer',
+                        type: 'raster',
+                        source: 'light',
+                        minzoom: 0,
+                        maxzoom: 19,
+                        layout: { visibility: 'none' }
+                    },
+                    {
+                        id: 'grey-layer',
+                        type: 'raster',
+                        source: 'grey',
+                        minzoom: 0,
+                        maxzoom: 19,
+                        layout: { visibility: 'none' }
                     }
                 ]
             },
@@ -272,13 +322,19 @@ export default function Map({
             }
         };
 
-        setVisibility('satellite-layer', layers.satellite);
+        // Base Map Styles
+        setVisibility('satellite-layer', mapStyle === 'satellite');
+        setVisibility('dark-layer', mapStyle === 'dark');
+        setVisibility('light-layer', mapStyle === 'light');
+        setVisibility('grey-layer', mapStyle === 'grey');
+
+        // Overlays
         setVisibility('night-layer', layers.night);
         setVisibility('moon-layer', layers.moon);
         setVisibility('moon-glow', layers.moon);
         setVisibility('iss-layer', layers.iss);
 
-    }, [layers, moonData, isMapLoaded]);
+    }, [layers, mapStyle, moonData, isMapLoaded]);
 
     return (
         <div className="map-wrap absolute inset-0 w-full h-full bg-[#0b0e14]">

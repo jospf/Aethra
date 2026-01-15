@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AVAILABLE_TIMEZONES } from '../../utils/timezones';
 
-export default function Sidebar({ layers, toggleLayer, moonData, issData, onLocate, clockSettings, toggleClockSetting, toggleTimezone }) {
+export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, moonData, issData, onLocate, clockSettings, toggleClockSetting, toggleTimezone }) {
 
     const [isOpen, setIsOpen] = useState(false);
 
@@ -24,24 +24,39 @@ export default function Sidebar({ layers, toggleLayer, moonData, issData, onLoca
             </button>
 
             {/* Sidebar Content */}
-            <div className="h-full bg-slate-900/90 backdrop-blur-xl border-l border-white/10 p-6 flex flex-col gap-6 overflow-hidden">
+            <div className="h-full bg-slate-900/90 backdrop-blur-xl border-l border-white/10 p-6 flex flex-col gap-6 overflow-hidden overflow-y-auto">
                 <div className={`transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'}`}>
+
+                    {/* Map Style Selector */}
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-4">
+                        Map Style
+                    </h2>
+                    <div className="grid grid-cols-4 gap-2 mb-8">
+                        {[
+                            { id: 'satellite', label: 'SAT' },
+                            { id: 'dark', label: 'DARK' },
+                            { id: 'light', label: 'LIGHT' },
+                            { id: 'grey', label: 'GREY' }
+                        ].map((style) => (
+                            <button
+                                key={style.id}
+                                onClick={() => onStyleChange(style.id)}
+                                className={`px-2 py-2 rounded-md text-[10px] font-medium uppercase tracking-wider border transition-all
+                                    ${mapStyle === style.id
+                                        ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
+                                        : 'bg-transparent border-white/10 text-gray-500 hover:border-white/30 hover:text-gray-300'
+                                    }`}
+                            >
+                                {style.label}
+                            </button>
+                        ))}
+                    </div>
+
                     <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-6">
                         Layer Control
                     </h2>
 
                     <div className="space-y-6">
-                        {/* Satellite Toggle */}
-                        <div className="flex items-center justify-between">
-                            <span className="text-gray-300 font-medium tracking-wide">Satellite</span>
-                            <button
-                                onClick={() => toggleLayer('satellite')}
-                                className={`w-12 h-6 rounded-full transition-colors relative ${layers.satellite ? 'bg-cyan-500' : 'bg-gray-700'}`}
-                            >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${layers.satellite ? 'translate-x-6' : 'translate-x-0'}`} />
-                            </button>
-                        </div>
-
                         {/* Terminator Toggle */}
                         <div className="flex items-center justify-between">
                             <span className="text-gray-300 font-medium tracking-wide">Day/Night</span>
