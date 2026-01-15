@@ -14,6 +14,9 @@ Aethra is designed to be lightweight, extensible, and easy to deploy on low-powe
 - **Clock Widgets**: Customizable world clocks with glassmorphism design, supporting multiple timezones (Local, UTC, etc.).
 - **Stardate Calculation**: Integrated Stardate display for a futuristic touch.
 - **Celestial Tracking**: Visual tracking of the Sun, Moon, and ISS (International Space Station).
+
+![Clock Interface Demo](assets/clock-interface-demo.png)
+
 - **Modern Tech Stack**: Fast development and deployment with Vite, Tailwind CSS, and FastAPI.
 - **Docker Ready**: One-command setup for the entire stack.
 
