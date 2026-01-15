@@ -1,48 +1,47 @@
 import React from 'react'
 import Map from './components/Map'
 import { ClockWidget } from './components/widgets/ClockWidget'
-import { useISS } from './hooks/useISS'
-import ISSWidget from './components/widgets/ISSWidget'
 
 function App() {
-    const { issData, loading, error } = useISS();
-
     return (
-        <div className="w-screen h-screen overflow-hidden bg-gray-900 text-white relative">
-            <Map issData={issData} />
+        <div className="relative w-screen h-screen overflow-hidden selection:bg-cyan-500/30">
+            {/* Map Background */}
+            <div className="absolute inset-0 z-0">
+                <Map />
+            </div>
 
-            {/* Overlay UI Layer */}
-            <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between p-6">
-                <header className="flex justify-between items-start">
-                    <div className="bg-gray-900/80 backdrop-blur-md p-4 rounded-2xl border border-white/10 pointer-events-auto shadow-2xl">
-                        <h1 className="text-2xl font-black bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 text-transparent bg-clip-text tracking-tighter">
+            {/* Header Overlay */}
+            <header className="absolute top-0 left-0 w-full z-10 p-6 flex justify-between items-start pointer-events-none">
+                {/* Brand / Status */}
+                <div className="flex flex-col gap-1 pointer-events-auto">
+                    <div className="flex items-center gap-3 bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10 shadow-2xl">
+                        <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent tracking-widest">
                             Aethra
                         </h1>
-                        <div className="flex items-center space-x-2 mt-1">
-                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">System Online</span>
-                        </div>
                     </div>
-
-                    <div className="pointer-events-auto flex grow justify-center px-12">
-                        <ClockWidget />
+                    <div className="flex items-center gap-2 px-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                        <span className="text-[10px] font-medium tracking-[0.2em] text-cyan-400/80 uppercase">
+                            System Online
+                        </span>
                     </div>
+                </div>
 
-                    <div className="w-[120px]"></div> {/* Spacer for symmetry */}
-                </header>
+                {/* Clock Widgets */}
+                <div className="absolute left-1/2 -translate-x-1/2 pointer-events-auto">
+                    <ClockWidget />
+                </div>
+            </header>
 
-                <footer className="flex justify-between items-end">
-                    <div className="bg-gray-900/60 backdrop-blur-md p-3 rounded-xl border border-white/10 pointer-events-auto text-[10px] text-gray-500 font-medium">
-                        © 2026 AETHRA COMMAND • GEOSPATIAL INTELLIGENCE
-                    </div>
-
-                    <div className="pointer-events-auto">
-                        <ISSWidget data={issData} loading={loading} error={error} />
-                    </div>
-                </footer>
-            </div>
+            {/* Footer Overlay */}
+            <footer className="absolute bottom-0 left-0 w-full z-10 p-4 flex justify-between items-end pointer-events-none">
+                <div className="text-[10px] text-white/30 tracking-wider font-light">
+                    © 2026 AETHRA COMMAND • GEOSPATIAL INTELLIGENCE
+                </div>
+            </footer>
         </div>
-    )
+    );
 }
 
 export default App
+
