@@ -96,9 +96,8 @@ export default function Map({ issData }) {
                     'line-cap': 'round'
                 },
                 paint: {
-                    'line-color': '#3b82f6',
-                    'line-width': 2,
-                    'line-dasharray': [2, 1],
+                    'line-color': '#4dabf7',
+                    'line-width': 3,
                     'line-opacity': 0.8
                 }
             });
@@ -119,7 +118,6 @@ export default function Map({ issData }) {
                     map.current.addImage('iss-icon', image);
                 }
 
-                // Add ISS symbol layer AFTER icon is loaded
                 if (!map.current.getLayer('iss-layer')) {
                     map.current.addLayer({
                         id: 'iss-layer',
@@ -127,7 +125,7 @@ export default function Map({ issData }) {
                         source: 'iss',
                         layout: {
                             'icon-image': 'iss-icon',
-                            'icon-size': 0.6,
+                            'icon-size': 1.5, // Increased size
                             'icon-allow-overlap': true
                         }
                     });
@@ -140,9 +138,9 @@ export default function Map({ issData }) {
                 type: 'circle',
                 source: 'iss',
                 paint: {
-                    'circle-radius': 15,
+                    'circle-radius': 30, // Increased glow radius
                     'circle-color': '#3b82f6',
-                    'circle-opacity': 0.4,
+                    'circle-opacity': 0.3,
                     'circle-blur': 1
                 }
             });
@@ -183,7 +181,7 @@ export default function Map({ issData }) {
                     features: [{
                         type: 'Feature',
                         geometry: {
-                            type: 'MultiLineString',
+                            type: 'LineString',
                             coordinates: issData.path
                         },
                         properties: {}
