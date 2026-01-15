@@ -81,28 +81,15 @@ export default function Map({ issData }) {
                 paint: {
                     'line-color': '#3b82f6',
                     'line-width': 2,
-                    'line-opacity': 0.6,
-                    'line-dasharray': [2, 1]
+                    'line-dasharray': [2, 1],
+                    'line-opacity': 0.6
                 }
             });
 
-            // ISS Source (Reusable for marker and glow)
+            // ISS Marker Layer
             map.current.addSource('iss', {
                 type: 'geojson',
                 data: { type: 'FeatureCollection', features: [] }
-            });
-
-            // ISS Glow Layer (Refined to be a tighter backing glow)
-            map.current.addLayer({
-                id: 'iss-glow',
-                type: 'circle',
-                source: 'iss',
-                paint: {
-                    'circle-radius': 15,
-                    'circle-color': '#ffffff',
-                    'circle-blur': 0.8,
-                    'circle-opacity': 0.4
-                }
             });
 
             // Load ISS Icon
@@ -123,11 +110,23 @@ export default function Map({ issData }) {
                         source: 'iss',
                         layout: {
                             'icon-image': 'iss-icon',
-                            'icon-size': 2.5,
-                            'icon-allow-overlap': true,
-                            'icon-anchor': 'center'
+                            'icon-size': 0.6,
+                            'icon-allow-overlap': true
                         }
                     });
+                }
+            });
+
+            // Glow for ISS
+            map.current.addLayer({
+                id: 'iss-glow',
+                type: 'circle',
+                source: 'iss',
+                paint: {
+                    'circle-radius': 15,
+                    'circle-color': '#3b82f6',
+                    'circle-opacity': 0.4,
+                    'circle-blur': 1
                 }
             });
         });
@@ -146,7 +145,7 @@ export default function Map({ issData }) {
     // Update ISS position and path
     useEffect(() => {
         if (map.current && issData) {
-            // Update ISS Marker Source
+            // Update Position
             if (map.current.getSource('iss')) {
                 map.current.getSource('iss').setData({
                     type: 'FeatureCollection',
@@ -160,15 +159,18 @@ export default function Map({ issData }) {
                 });
             }
 
-            // Update ISS Path Source (Handle segments)
-            if (issData.path && map.current.getSource('iss-path')) {
+            // Update Orbital Path
+            if (map.current.getSource('iss-path') && issData.path) {
                 map.current.getSource('iss-path').setData({
-                    type: 'Feature',
-                    geometry: {
-                        type: 'MultiLineString',
-                        coordinates: issData.path
-                    },
-                    properties: {}
+                    type: 'FeatureCollection',
+                    features: [{
+                        type: 'Feature',
+                        geometry: {
+                            type: 'LineString',
+                            coordinates: issData.path
+                        },
+                        properties: {}
+                    }]
                 });
             }
         }
