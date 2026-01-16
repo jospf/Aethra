@@ -14,6 +14,9 @@ Aethra is designed to be lightweight, extensible, and easy to deploy on low-powe
 - **Clock Widgets**: Customizable world clocks with glassmorphism design, supporting multiple timezones (Local, UTC, etc.).
 - **Stardate Calculation**: Integrated Stardate display for a futuristic touch.
 - **Celestial Tracking**: Visual tracking of the Sun, Moon, and ISS (International Space Station).
+- **Weather Visualization**: Real-time global precipitation radar and Aurora Forecast heatmaps.
+- **Geological Events**: Live tracking of significant earthquakes and active volcanoes.
+- **Map Customization**: Multiple base map styles (Satellite, Dark, Light, Grey).
 
 ![Clock Interface Demo](assets/clock-interface-demo.png)
 
