@@ -211,6 +211,32 @@ export default function Map({
                 data: { type: 'FeatureCollection', features: [] }
             });
 
+            // Add pulsing glow for recent earthquakes (last 24 hours only)
+            const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
+
+            map.current.addLayer({
+                id: 'earthquakes-pulse',
+                type: 'circle',
+                source: 'earthquakes',
+                filter: ['>=', ['get', 'time'], twentyFourHoursAgo],
+                paint: {
+                    'circle-radius': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', 'mag'],
+                        2, 15,   // Much larger for visibility
+                        6, 30,
+                        8, 50
+                    ],
+                    'circle-color': '#ff0000', // Bright red for maximum visibility
+                    'circle-opacity': 0.6,
+                    'circle-blur': 1.5  // More blur for glow effect
+                },
+                layout: {
+                    'visibility': 'none'
+                }
+            });
+
             map.current.addLayer({
                 id: 'earthquakes-layer',
                 type: 'circle',
@@ -220,9 +246,9 @@ export default function Map({
                         'interpolate',
                         ['linear'],
                         ['get', 'mag'],
-                        2, 2,
-                        6, 8,
-                        8, 15
+                        2, 3,
+                        6, 10,
+                        8, 18
                     ],
                     'circle-color': [
                         'interpolate',
@@ -232,9 +258,10 @@ export default function Map({
                         5, '#ef4444', // Red-500
                         7, '#b91c1c'  // Red-700
                     ],
-                    'circle-opacity': 0.7,
-                    'circle-stroke-width': 1,
-                    'circle-stroke-color': '#fff'
+                    'circle-opacity': 0.8,
+                    'circle-stroke-width': 1.5,
+                    'circle-stroke-color': '#fff',
+                    'circle-stroke-opacity': 0.9
                 },
                 layout: {
                     'visibility': 'none'
@@ -533,6 +560,39 @@ export default function Map({
         }
     }, [earthquakeData, isMapLoaded]);
 
+    // Animate earthquake pulse layer
+    useEffect(() => {
+        if (!map.current || !map.current.getLayer('earthquakes-pulse') || !weatherLayers.earthquakes) return;
+
+        console.log('Starting earthquake pulse animation...');
+        let animationId;
+        let pulseFrame = 0;
+
+        const animatePulse = () => {
+            if (!map.current || !map.current.getLayer('earthquakes-pulse')) return;
+
+            pulseFrame += 0.05; // Faster animation
+            const opacity = (Math.sin(pulseFrame) + 1) / 2 * 0.7; // Oscillate between 0 and 0.7
+
+            try {
+                map.current.setPaintProperty('earthquakes-pulse', 'circle-opacity', opacity);
+            } catch (e) {
+                console.error('Error setting pulse opacity:', e);
+            }
+
+            animationId = requestAnimationFrame(animatePulse);
+        };
+
+        animatePulse();
+
+        return () => {
+            console.log('Stopping earthquake pulse animation');
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        };
+    }, [isMapLoaded, weatherLayers.earthquakes]);
+
     // Update Volcano Data
     useEffect(() => {
         if (map.current && volcanoData && map.current.getSource('volcanoes')) {
@@ -577,6 +637,7 @@ export default function Map({
         // Geological
         if (map.current.getLayer('earthquakes-layer')) {
             setVisibility('earthquakes-layer', weatherLayers.earthquakes);
+            setVisibility('earthquakes-pulse', weatherLayers.earthquakes);
         }
         if (map.current.getLayer('volcanoes-layer')) {
             setVisibility('volcanoes-layer', weatherLayers.volcanoes);
