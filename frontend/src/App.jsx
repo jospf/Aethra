@@ -12,6 +12,7 @@ function App() {
         moon: true,
         iss: false
     });
+    const [showDateLine, setShowDateLine] = useState(true);
     const [weatherLayers, setWeatherLayers] = useState({
         precipitation: false,
         aurora: false,
@@ -72,6 +73,7 @@ function App() {
                 <Map
                     mapStyle={mapStyle}
                     layers={layers}
+                    showDateLine={showDateLine}
                     weatherLayers={weatherLayers}
                     moonData={moonData}
                     issData={issData}
@@ -85,6 +87,8 @@ function App() {
                 onStyleChange={setMapStyle}
                 layers={layers}
                 toggleLayer={toggleLayer}
+                showDateLine={showDateLine}
+                toggleDateLine={() => setShowDateLine(!showDateLine)}
                 weatherLayers={weatherLayers}
                 toggleWeatherLayer={toggleWeatherLayer}
                 moonData={moonData}

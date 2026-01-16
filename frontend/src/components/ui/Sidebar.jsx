@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AVAILABLE_TIMEZONES } from '../../utils/timezones';
 
-export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, weatherLayers, toggleWeatherLayer, moonData, issData, onLocate, clockSettings, toggleClockSetting, toggleTimezone }) {
+export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, showDateLine, toggleDateLine, weatherLayers, toggleWeatherLayer, moonData, issData, onLocate, clockSettings, toggleClockSetting, toggleTimezone }) {
 
     const [isOpen, setIsOpen] = useState(false);
 
@@ -197,6 +197,25 @@ export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, 
                                 className={`w-12 h-6 rounded-full transition-colors relative ${weatherLayers.volcanoes ? 'bg-red-500' : 'bg-gray-700'}`}
                             >
                                 <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${weatherLayers.volcanoes ? 'translate-x-6' : 'translate-x-0'}`} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-white/10">
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent mb-6">
+                        Geographical Features
+                    </h2>
+
+                    <div className="space-y-6">
+                        {/* IDL Toggle */}
+                        <div className="flex items-center justify-between">
+                            <span className="text-gray-300 font-medium tracking-wide">International Date Line</span>
+                            <button
+                                onClick={toggleDateLine}
+                                className={`w-12 h-6 rounded-full transition-colors relative ${showDateLine ? 'bg-indigo-500' : 'bg-gray-700'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${showDateLine ? 'translate-x-6' : 'translate-x-0'}`} />
                             </button>
                         </div>
                     </div>

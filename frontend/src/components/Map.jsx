@@ -6,10 +6,12 @@ import { useWeather } from '../hooks/useWeather';
 import { useAurora } from '../hooks/useAurora';
 import { useEarthquakes } from '../hooks/useEarthquakes';
 import { useVolcanoes } from '../hooks/useVolcanoes';
+import dateLineGeoJson from '../data/dateLine.json';
 
 export default function Map({
     mapStyle = 'satellite',
     layers = { night: true, moon: true, iss: true },
+    showDateLine = true,
     weatherLayers = { precipitation: false, clouds: false, temperature: false },
     moonData,
     issData,
@@ -46,6 +48,7 @@ export default function Map({
             container: mapContainer.current,
             style: {
                 version: 8,
+                glyphs: 'https://fonts.openmaptiles.org/{fontstack}/{range}.pbf',
                 sources: {
                     'satellite': {
                         type: 'raster',
@@ -282,6 +285,28 @@ export default function Map({
                 }
             });
 
+            // 8. INTERNATIONAL DATE LINE
+            map.current.addSource('date-line', {
+                type: 'geojson',
+                data: dateLineGeoJson
+            });
+
+            map.current.addLayer({
+                id: 'date-line-layer',
+                type: 'line',
+                source: 'date-line',
+                paint: {
+                    'line-color': '#f0abfc', // Fuchsia-300 (Magenta-ish)
+                    'line-width': 2,
+                    'line-dasharray': [2, 4]
+                },
+                layout: {
+                    'visibility': 'none'
+                }
+            });
+
+
+
             // 2. MOON LAYER
             map.current.addSource('moon', {
                 type: 'geojson',
@@ -515,6 +540,8 @@ export default function Map({
         }
     }, [volcanoData, isMapLoaded]);
 
+
+
     // Handle Layer Toggles
     useEffect(() => {
         if (!map.current) return;
@@ -555,7 +582,12 @@ export default function Map({
             setVisibility('volcanoes-layer', weatherLayers.volcanoes);
         }
 
-    }, [layers, mapStyle, moonData, isMapLoaded, weatherLayers]);
+        // Date Line
+        if (map.current.getLayer('date-line-layer')) {
+            setVisibility('date-line-layer', showDateLine);
+        }
+
+    }, [layers, mapStyle, moonData, isMapLoaded, weatherLayers, showDateLine]);
 
     return (
         <div className="map-wrap absolute inset-0 w-full h-full bg-[#0b0e14]">
