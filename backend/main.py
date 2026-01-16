@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from skyfield.api import load, wgs84
 from skyfield import almanac
 from datetime import datetime, timezone
+import json
+import os
 
 app = FastAPI()
 
@@ -90,3 +92,24 @@ def get_iss_position():
         "latitude": subpoint.latitude.degrees,
         "longitude": subpoint.longitude.degrees
     }
+
+@app.get("/api/volcanoes")
+def get_volcanoes():
+    """
+    Get volcano data as GeoJSON
+    Returns static list of active/notable volcanoes
+    """
+    try:
+        # Load volcanoes.json from the same directory as main.py
+        volcano_file_path = os.path.join(os.path.dirname(__file__), 'volcanoes.json')
+        
+        with open(volcano_file_path, 'r') as f:
+            volcano_data = json.load(f)
+        
+        return volcano_data
+    except FileNotFoundError:
+        return {"type": "FeatureCollection", "features": []}
+    except Exception as e:
+        print(f"Error loading volcano data: {e}")
+        return {"type": "FeatureCollection", "features": []}
+

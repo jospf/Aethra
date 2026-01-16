@@ -1,0 +1,239 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -155.6027,
+                    19.4217
+                ]
+            },
+            "properties": {
+                "name": "Mauna Loa",
+                "country": "United States",
+                "region": "Hawaii",
+                "elevation": 4169,
+                "type": "Shield",
+                "status": "Active"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -155.287,
+                    19.407
+                ]
+            },
+            "properties": {
+                "name": "Kilauea",
+                "country": "United States",
+                "region": "Hawaii",
+                "elevation": 1222,
+                "type": "Shield",
+                "status": "Erupting"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    14.994,
+                    37.751
+                ]
+            },
+            "properties": {
+                "name": "Etna",
+                "country": "Italy",
+                "region": "Sicily",
+                "elevation": 3350,
+                "type": "Stratovolcano",
+                "status": "Erupting"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    15.213,
+                    38.789
+                ]
+            },
+            "properties": {
+                "name": "Stromboli",
+                "country": "Italy",
+                "region": "Aeolian Islands",
+                "elevation": 926,
+                "type": "Stratovolcano",
+                "status": "Erupting"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -19.62,
+                    63.63
+                ]
+            },
+            "properties": {
+                "name": "Katla",
+                "country": "Iceland",
+                "region": "Southern Iceland",
+                "elevation": 1512,
+                "type": "Subglacial",
+                "status": "Restless"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -22.17,
+                    63.90
+                ]
+            },
+            "properties": {
+                "name": "Fagradalsfjall",
+                "country": "Iceland",
+                "region": "Reykjanes Peninsula",
+                "elevation": 385,
+                "type": "Fissure vent",
+                "status": "Active"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    110.446,
+                    -7.541
+                ]
+            },
+            "properties": {
+                "name": "Merapi",
+                "country": "Indonesia",
+                "region": "Java",
+                "elevation": 2930,
+                "type": "Stratovolcano",
+                "status": "Erupting"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    123.956,
+                    13.257
+                ]
+            },
+            "properties": {
+                "name": "Mayon",
+                "country": "Philippines",
+                "region": "Luzon",
+                "elevation": 2463,
+                "type": "Stratovolcano",
+                "status": "Erupting"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    130.657,
+                    31.593
+                ]
+            },
+            "properties": {
+                "name": "Sakurajima",
+                "country": "Japan",
+                "region": "Kyushu",
+                "elevation": 1117,
+                "type": "Stratovolcano",
+                "status": "Erupting"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -98.62,
+                    19.02
+                ]
+            },
+            "properties": {
+                "name": "Popocatépetl",
+                "country": "Mexico",
+                "region": "Central Mexico",
+                "elevation": 5393,
+                "type": "Stratovolcano",
+                "status": "Erupting"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -78.446,
+                    -0.677
+                ]
+            },
+            "properties": {
+                "name": "Cotopaxi",
+                "country": "Ecuador",
+                "region": "Andes",
+                "elevation": 5897,
+                "type": "Stratovolcano",
+                "status": "Restless"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    169.444,
+                    -19.527
+                ]
+            },
+            "properties": {
+                "name": "Yasur",
+                "country": "Vanuatu",
+                "region": "Tanna Island",
+                "elevation": 361,
+                "type": "Stratovolcano",
+                "status": "Erupting"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    177.18,
+                    -77.53
+                ]
+            },
+            "properties": {
+                "name": "Erebus",
+                "country": "Antarctica",
+                "region": "Ross Island",
+                "elevation": 3794,
+                "type": "Stratovolcano",
+                "status": "Erupting"
+            }
+        }
+    ]
+}
