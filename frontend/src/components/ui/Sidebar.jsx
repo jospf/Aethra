@@ -267,6 +267,25 @@ export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, 
                 </div>
 
                 <div className="mt-6 pt-6 border-t border-white/10">
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent mb-6">
+                        Infrastructure
+                    </h2>
+
+                    <div className="space-y-6">
+                        {/* Submarine Cables Toggle */}
+                        <div className="flex items-center justify-between">
+                            <span className="text-gray-300 font-medium tracking-wide">Submarine Cables</span>
+                            <button
+                                onClick={() => toggleWeatherLayer('cables')}
+                                className={`w-12 h-6 rounded-full transition-colors relative ${weatherLayers.cables ? 'bg-emerald-500' : 'bg-gray-700'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${weatherLayers.cables ? 'translate-x-6' : 'translate-x-0'}`} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-white/10">
                     <h2 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent mb-6">
                         Geographical Features
                     </h2>

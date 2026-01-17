@@ -9,6 +9,7 @@ import { useVolcanoes } from '../hooks/useVolcanoes';
 import { useFlights } from '../hooks/useFlights';
 import { useShips } from '../hooks/useShips';
 import dateLineGeoJson from '../data/dateLine.json';
+import cablesGeoJson from '../data/cables.json';
 
 export default function Map({
     mapStyle = 'satellite',
@@ -482,6 +483,27 @@ export default function Map({
                     'visibility': 'none'
                 }
             });
+
+            // 7.8 SUBMARINE CABLES LAYER
+            map.current.addSource('cables', {
+                type: 'geojson',
+                data: cablesGeoJson
+            });
+
+            map.current.addLayer({
+                id: 'cables-layer',
+                type: 'line',
+                source: 'cables',
+                paint: {
+                    'line-color': '#10b981', // Emerald-500
+                    'line-width': 1,
+                    'line-opacity': 0.7
+                },
+                layout: {
+                    'visibility': 'none'
+                }
+            });
+
             map.current.addSource('date-line', {
                 type: 'geojson',
                 data: dateLineGeoJson
@@ -840,6 +862,9 @@ export default function Map({
         }
         if (map.current.getLayer('ships-layer')) {
             setVisibility('ships-layer', weatherLayers.ships);
+        }
+        if (map.current.getLayer('cables-layer')) {
+            setVisibility('cables-layer', weatherLayers.cables);
         }
 
         // Date Line

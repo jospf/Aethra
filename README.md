@@ -23,6 +23,8 @@ Aethra is designed to be lightweight, extensible, and easy to deploy on low-powe
 - **Global Traffic**:
   - **Flight Traffic**: Real-time global aircraft positions via OpenSky Network with heading-based rotation and dynamic icons.
   - **Maritime Traffic**: Live ship positions via AisStream.io WebSocket integration (requires free API key).
+- **Infrastructure**:
+  - **Submarine Cables**: Visualization of the global fiber optic network connecting continents.
 - **Map Customization**: Multiple base map styles (Satellite, Dark, Light, Grey).
 
 ![Clock Interface Demo](assets/clock-interface-demo.png)
