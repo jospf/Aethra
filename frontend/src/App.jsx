@@ -20,6 +20,7 @@ function App() {
         earthquakes: false,
         volcanoes: false,
         flights: false,
+        ships: false,
         clouds: false,
         temperature: false
     });

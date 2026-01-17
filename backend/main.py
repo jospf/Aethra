@@ -213,3 +213,139 @@ def get_flights():
     except Exception as e:
         print(f"Error fetching flights: {e}")
         return {"type": "FeatureCollection", "features": []}
+
+
+# --- Maritime Tracking (AisStream.io) ---
+
+import asyncio
+import websockets
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Global in-memory storage for ship data
+# { mmsi: { lat, lon, name, etc, timestamp } }
+ships_data = {}
+
+async def connect_to_aisstream():
+    """
+    Background task to connect to AisStream.io WebSocket
+    and update ships_data in real-time.
+    """
+    api_key = os.getenv("AISSTREAM_API_KEY")
+    if not api_key:
+        print("AISSTREAM_API_KEY not found in .env - Maritime tracking disabled")
+        return
+
+    print(f"Starting AisStream connection with key: {api_key[:5]}...")
+    
+    # Subscribe to PositionReport and ShipStaticData messages for the whole world
+    subscription_message = {
+        "APIKey": api_key,
+        "BoundingBoxes": [[[-90, -180], [90, 180]]], # Global coverage
+        "FilterMessageTypes": ["PositionReport", "ShipStaticData"],
+        "FilterShipMMSI": [] 
+    }
+
+    while True:
+        try:
+            async with websockets.connect("wss://stream.aisstream.io/v0/stream") as websocket:
+                await websocket.send(json.dumps(subscription_message))
+                print("Connected to AisStream.io WebSocket")
+                
+                async for message_json in websocket:
+                    try:
+                        message = json.loads(message_json)
+                        msg_type = message.get("MessageType")
+                        
+                        if msg_type == "PositionReport":
+                            report = message["Message"]["PositionReport"]
+                            mmsi = report["UserID"]
+                            
+                            # Create or update entry
+                            if mmsi not in ships_data:
+                                ships_data[mmsi] = {}
+                                
+                            ships_data[mmsi].update({
+                                "mmsi": mmsi,
+                                "lat": report["Latitude"],
+                                "lon": report["Longitude"],
+                                "sog": report.get("Sog", 0),  # Speed over ground
+                                "cog": report.get("Cog", 0),  # Course over ground
+                                "timestamp": datetime.now(timezone.utc).timestamp()
+                            })
+                            
+                        elif msg_type == "ShipStaticData":
+                            report = message["Message"]["ShipStaticData"]
+                            mmsi = report["UserID"]
+                            
+                            if mmsi not in ships_data:
+                                ships_data[mmsi] = {}
+                                
+                            ships_data[mmsi].update({
+                                "name": report.get("Name", "Unknown").strip(),
+                                "ship_type": report.get("Type", 0),
+                                "callsign": report.get("CallSign", "").strip(),
+                                "destination": report.get("Destination", "").strip(),
+                                "timestamp": datetime.now(timezone.utc).timestamp()
+                            })
+                            
+                        # Prune old ships (simulated garbage collection)
+                        # In a production app, do this periodically, not every message
+                        if len(ships_data) > 2000:
+                            # Keep only recent 1000 ships
+                            sorted_ships = sorted(ships_data.items(), key=lambda x: x[1].get('timestamp', 0), reverse=True)
+                            ships_data.clear()
+                            ships_data.update(dict(sorted_ships[:1000]))
+                            
+                    except Exception as msg_error:
+                        # Ignore malformed messages
+                        pass
+                        
+        except Exception as e:
+            print(f"AisStream WebSocket error: {e}")
+            print("Reconnecting in 10 seconds...")
+            await asyncio.sleep(10)
+
+@app.on_event("startup")
+async def startup_event():
+    # Start the AIS background task
+    asyncio.create_task(connect_to_aisstream())
+
+@app.get("/api/ships")
+def get_ships():
+    """
+    Get real-time maritime traffic data
+    Returns GeoJSON of ship positions
+    """
+    features = []
+    current_time = datetime.now(timezone.utc).timestamp()
+    
+    # Convert dict to list for iteration to avoid runtime errors if dict changes size
+    for mmsi, data in list(ships_data.items()):
+        # Filter out very old stale data (> 10 minutes)
+        if current_time - data.get('timestamp', 0) > 600:
+            continue
+            
+        if 'lat' not in data or 'lon' not in data:
+            continue
+            
+        feature = {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [data['lon'], data['lat']]
+            },
+            "properties": {
+                "mmsi": data.get("mmsi"),
+                "name": data.get("name", "Unknown"),
+                "type": data.get("ship_type", 0),
+                "speed": data.get("sog", 0),
+                "heading": data.get("cog", 0),
+                "destination": data.get("destination", "Unknown")
+            }
+        }
+        features.append(feature)
+    
+    return {"type": "FeatureCollection", "features": features}

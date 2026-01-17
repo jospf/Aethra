@@ -7,6 +7,7 @@ import { useAurora } from '../hooks/useAurora';
 import { useEarthquakes } from '../hooks/useEarthquakes';
 import { useVolcanoes } from '../hooks/useVolcanoes';
 import { useFlights } from '../hooks/useFlights';
+import { useShips } from '../hooks/useShips';
 import dateLineGeoJson from '../data/dateLine.json';
 
 export default function Map({
@@ -31,6 +32,7 @@ export default function Map({
     const { earthquakeData } = useEarthquakes();
     const { volcanoData } = useVolcanoes();
     const { flightData } = useFlights();
+    const { shipData } = useShips();
 
     // Handle FlyTo Focus
     useEffect(() => {
@@ -433,7 +435,53 @@ export default function Map({
                 }
             });
 
-            // 8. INTERNATIONAL DATE LINE
+
+
+            // 7.6 MARITIME TRAFFIC LAYER
+            const createShipIcon = () => {
+                const size = 20;
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+
+                // Draw boat shape (pointing North/Up)
+                ctx.fillStyle = '#06b6d4'; // Cyan-500
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1;
+
+                ctx.beginPath();
+                ctx.moveTo(10, 2);  // Bow
+                ctx.lineTo(16, 18); // Stern Right
+                ctx.lineTo(10, 16); // Stern Center (indent)
+                ctx.lineTo(4, 18);  // Stern Left
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                return ctx.getImageData(0, 0, size, size);
+            };
+
+            map.current.addImage('ship-icon', createShipIcon(), { pixelRatio: 2 });
+
+            map.current.addSource('ships', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+
+            map.current.addLayer({
+                id: 'ships-layer',
+                type: 'symbol',
+                source: 'ships',
+                layout: {
+                    'icon-image': 'ship-icon',
+                    'icon-size': 0.7,
+                    'icon-rotate': ['get', 'heading'],
+                    'icon-allow-overlap': true,
+                    'icon-rotation-alignment': 'map',
+                    'visibility': 'none'
+                }
+            });
             map.current.addSource('date-line', {
                 type: 'geojson',
                 data: dateLineGeoJson
@@ -616,6 +664,13 @@ export default function Map({
         }
     }, [flightData, isMapLoaded]);
 
+    // Update Ship Data
+    useEffect(() => {
+        if (map.current && shipData && map.current.getSource('ships')) {
+            map.current.getSource('ships').setData(shipData);
+        }
+    }, [shipData, isMapLoaded]);
+
     // Update Moon Data
     useEffect(() => {
         if (map.current && moonData && map.current.getSource('moon')) {
@@ -782,6 +837,9 @@ export default function Map({
         }
         if (map.current.getLayer('flights-layer')) {
             setVisibility('flights-layer', weatherLayers.flights);
+        }
+        if (map.current.getLayer('ships-layer')) {
+            setVisibility('ships-layer', weatherLayers.ships);
         }
 
         // Date Line

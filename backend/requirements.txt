@@ -4,3 +4,5 @@ skyfield
 pydantic
 feedparser
 requests
+python-dotenv
+websockets
