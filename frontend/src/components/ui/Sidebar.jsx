@@ -68,6 +68,17 @@ export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, 
                             </button>
                         </div>
 
+                        {/* City Lights Toggle */}
+                        <div className="flex items-center justify-between">
+                            <span className="text-gray-300 font-medium tracking-wide">City Lights</span>
+                            <button
+                                onClick={() => toggleLayer('cityLights')}
+                                className={`w-12 h-6 rounded-full transition-colors relative ${layers.cityLights ? 'bg-cyan-500' : 'bg-gray-700'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${layers.cityLights ? 'translate-x-6' : 'translate-x-0'}`} />
+                            </button>
+                        </div>
+
                         {/* Moon Toggle */}
                         <div className="flex flex-col gap-2">
                             <div className="flex items-center justify-between">

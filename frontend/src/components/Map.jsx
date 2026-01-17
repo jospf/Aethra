@@ -81,6 +81,15 @@ export default function Map({
                         ],
                         tileSize: 256,
                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    },
+                    'city-lights': {
+                        type: 'raster',
+                        tiles: [
+                            // NASA Black Marble / Earth at Night composite
+                            'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_Black_Marble/default/2016-01-01/GoogleMapsCompatible_Level8/{z}/{y}/{x}.png'
+                        ],
+                        tileSize: 256,
+                        attribution: 'NASA Earth Observatory'
                     }
                 },
                 layers: [
@@ -140,6 +149,19 @@ export default function Map({
                 paint: {
                     'fill-color': '#000000',
                     'fill-opacity': 0.5
+                }
+            });
+
+            // 2. CITY LIGHTS LAYER (Earth at Night)
+            map.current.addLayer({
+                id: 'city-lights-layer',
+                type: 'raster',
+                source: 'city-lights',
+                paint: {
+                    'raster-opacity': 0.8
+                },
+                layout: {
+                    'visibility': 'none'
                 }
             });
 
@@ -640,6 +662,7 @@ export default function Map({
 
         // Overlays
         setVisibility('night-layer', layers.night);
+        setVisibility('city-lights-layer', layers.cityLights);
         setVisibility('moon-layer', layers.moon);
         setVisibility('moon-glow', layers.moon);
         setVisibility('iss-layer', layers.iss);

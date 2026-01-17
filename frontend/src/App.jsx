@@ -10,7 +10,8 @@ function App() {
     const [layers, setLayers] = useState({
         night: true,
         moon: true,
-        iss: false
+        iss: false,
+        cityLights: false
     });
     const [showDateLine, setShowDateLine] = useState(true);
     const [weatherLayers, setWeatherLayers] = useState({
