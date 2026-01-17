@@ -82,3 +82,38 @@ export function createNightPolygon(date = new Date()) {
         }
     };
 }
+
+/**
+ * Create a GeoJSON polygon representing the day side of Earth (inverse of night)
+ */
+export function createDayPolygon(date = new Date()) {
+    // Check illumination at the North Pole to determine wrapping direction
+    const northPoleSun = SunCalc.getPosition(date, 89.9, 0);
+    const wrapViaNorth = northPoleSun.altitude < 0;
+
+    // 1. Calculate terminator line
+    const terminator = calculateTerminator(date, wrapViaNorth);
+
+    // 2. Wrap via the pole that is in DAYLIGHT (opposite of night)
+    const wrapLat = wrapViaNorth ? -85 : 85;
+
+    // 3. Construct the polygon for the day side
+    const polygon = [
+        ...terminator,
+        [180, wrapLat],
+        [-180, wrapLat],
+        terminator[0] // Close the loop
+    ];
+
+    return {
+        type: 'Feature',
+        geometry: {
+            type: 'Polygon',
+            coordinates: [polygon]
+        },
+        properties: {
+            timestamp: date.toISOString(),
+            wrapViaNorth
+        }
+    };
+}

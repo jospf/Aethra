@@ -1,18 +1,21 @@
 import { useState, useEffect } from 'react';
-import { createNightPolygon } from '../utils/terminator';
+import { createNightPolygon, createDayPolygon } from '../utils/terminator';
 
 /**
  * Hook to calculate and update terminator position
  * Updates every minute
+ * Returns both night and day polygons
  */
 export function useTerminator() {
-    // Calculate initial terminator immediately using lazy initialization
+    // Calculate initial polygons immediately using lazy initialization
     const [nightPolygon, setNightPolygon] = useState(() => createNightPolygon(new Date()));
+    const [dayPolygon, setDayPolygon] = useState(() => createDayPolygon(new Date()));
 
     useEffect(() => {
         const updateTerminator = () => {
-            const polygon = createNightPolygon(new Date());
-            setNightPolygon(polygon);
+            const now = new Date();
+            setNightPolygon(createNightPolygon(now));
+            setDayPolygon(createDayPolygon(now));
         };
 
         // Update every minute
@@ -21,5 +24,5 @@ export function useTerminator() {
         return () => clearInterval(interval);
     }, []);
 
-    return nightPolygon;
+    return { nightPolygon, dayPolygon };
 }

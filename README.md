@@ -11,11 +11,15 @@ Aethra is designed to be lightweight, extensible, and easy to deploy on low-powe
 ## Key Features
 
 - **Dynamic Map Visuals**: Real-time daylight terminator (day/night boundary) powered by MapLibre GL.
+- **Day/Night Mode**: Differential map rendering showing satellite imagery in daylit regions and city lights in nighttime regions.
+- **City Lights Layer**: NASA Black Marble composite showing Earth's nocturnal illumination from space.
 - **Clock Widgets**: Customizable world clocks with glassmorphism design, supporting multiple timezones (Local, UTC, etc.).
 - **Stardate Calculation**: Integrated Stardate display for a futuristic touch.
 - **Celestial Tracking**: Visual tracking of the Sun, Moon, and ISS (International Space Station).
 - **Weather Visualization**: Real-time global precipitation radar and Aurora Forecast heatmaps.
-- **Geological Events**: Live tracking of significant earthquakes and active volcanoes.
+- **Geological Events**:
+  - **Earthquakes**: Live M2.5+ earthquake tracking with pulsing animation for recent events (last 24 hours).
+  - **Volcanoes**: Live volcanic activity feed from Smithsonian GVP with color-coded alert levels (red=erupting, orange=active, gray=monitored).
 - **Map Customization**: Multiple base map styles (Satellite, Dark, Light, Grey).
 
 ![Clock Interface Demo](assets/clock-interface-demo.png)

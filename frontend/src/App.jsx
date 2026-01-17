@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Map from './components/Map'
 import { ClockWidget } from './components/widgets/ClockWidget'
 import { useMoon } from './hooks/useMoon';
@@ -23,8 +23,21 @@ function App() {
         temperature: false
     });
     const [focusLocation, setFocusLocation] = useState(null);
+    const [dayNightMode, setDayNightMode] = useState(false);
     const { moonData } = useMoon();
     const issData = useISS();
+
+    // Auto-sync layers when Day/Night Mode is toggled
+    useEffect(() => {
+        if (dayNightMode) {
+            // Enable required layers for day/night effect
+            setLayers(prev => ({
+                ...prev,
+                night: true,
+                cityLights: true
+            }));
+        }
+    }, [dayNightMode]);
 
     const toggleLayer = (layer) => {
         setLayers(prev => ({
@@ -79,6 +92,7 @@ function App() {
                     moonData={moonData}
                     issData={issData}
                     focusLocation={focusLocation}
+                    dayNightMode={dayNightMode}
                 />
             </div>
 
@@ -98,6 +112,8 @@ function App() {
                 clockSettings={clockSettings}
                 toggleClockSetting={toggleClockSetting}
                 toggleTimezone={toggleTimezone}
+                dayNightMode={dayNightMode}
+                toggleDayNightMode={() => setDayNightMode(!dayNightMode)}
             />
 
             {/* Header Overlay */}

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AVAILABLE_TIMEZONES } from '../../utils/timezones';
 
-export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, showDateLine, toggleDateLine, weatherLayers, toggleWeatherLayer, moonData, issData, onLocate, clockSettings, toggleClockSetting, toggleTimezone }) {
+export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, showDateLine, toggleDateLine, weatherLayers, toggleWeatherLayer, moonData, issData, onLocate, clockSettings, toggleClockSetting, toggleTimezone, dayNightMode, toggleDayNightMode }) {
 
     const [isOpen, setIsOpen] = useState(false);
 
@@ -77,6 +77,29 @@ export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, 
                             >
                                 <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${layers.cityLights ? 'translate-x-6' : 'translate-x-0'}`} />
                             </button>
+                        </div>
+
+                        {/* Day/Night Mode Toggle */}
+                        <div className="flex flex-col gap-2 mt-2 p-3 rounded-lg border border-cyan-500/20 bg-cyan-500/5">
+                            <div className="flex items-center justify-between">
+                                <div className="flex flex-col">
+                                    <span className="text-cyan-300 font-semibold tracking-wide">Day/Night Mode</span>
+                                    <span className="text-[9px] text-gray-500 uppercase tracking-wider">
+                                        Auto Differential Maps
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={toggleDayNightMode}
+                                    className={`w-12 h-6 rounded-full transition-colors relative ${dayNightMode ? 'bg-gradient-to-r from-yellow-400 to-indigo-600' : 'bg-gray-700'}`}
+                                >
+                                    <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${dayNightMode ? 'translate-x-6' : 'translate-x-0'}`} />
+                                </button>
+                            </div>
+                            {dayNightMode && (
+                                <p className="text-[9px] text-cyan-400/80 leading-relaxed">
+                                    Satellite in day • City lights in night
+                                </p>
+                            )}
                         </div>
 
                         {/* Moon Toggle */}

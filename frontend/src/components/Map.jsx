@@ -15,7 +15,8 @@ export default function Map({
     weatherLayers = { precipitation: false, clouds: false, temperature: false },
     moonData,
     issData,
-    focusLocation
+    focusLocation,
+    dayNightMode = false
 }) {
     const mapContainer = useRef(null);
     const map = useRef(null);
@@ -23,7 +24,7 @@ export default function Map({
     const [lat] = useState(0);
     const [zoom] = useState(1.5); // Start zoomed out for global view
     const [isMapLoaded, setIsMapLoaded] = useState(false);
-    const nightPolygon = useTerminator();
+    const { nightPolygon, dayPolygon } = useTerminator();
     const { radarPath } = useWeather();
     const { auroraData } = useAurora();
     const { earthquakeData } = useEarthquakes();
@@ -136,7 +137,7 @@ export default function Map({
         map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
 
         map.current.on('load', () => {
-            // 1. NIGHT LAYER
+            // 1. NIGHT LAYER - Solid black mask covering night areas
             map.current.addSource('night', {
                 type: 'geojson',
                 data: { type: 'FeatureCollection', features: [] }
@@ -152,7 +153,8 @@ export default function Map({
                 }
             });
 
-            // 2. CITY LIGHTS LAYER (Earth at Night)
+            // 2. CITY LIGHTS LAYER - Rendered ON TOP of night layer
+            // In Day/Night Mode: night becomes solid black, city lights show on top
             map.current.addLayer({
                 id: 'city-lights-layer',
                 type: 'raster',
@@ -162,6 +164,23 @@ export default function Map({
                 },
                 layout: {
                     'visibility': 'none'
+                }
+            });
+
+            // 3. DAY MASK LAYER - Covers city lights in daylit areas
+            // Only visible in Day/Night Mode to hide city lights where it's daytime
+            map.current.addSource('day-mask', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+
+            map.current.addLayer({
+                id: 'day-mask-layer',
+                type: 'fill',
+                source: 'day-mask',
+                paint: {
+                    'fill-color': '#000000',  // Will match base map in Day/Night Mode
+                    'fill-opacity': 0  // Hidden by default
                 }
             });
 
@@ -519,7 +538,15 @@ export default function Map({
                 features: [nightPolygon]
             });
         }
-    }, [nightPolygon, isMapLoaded]);
+
+        // Also update day mask layer
+        if (map.current && dayPolygon && map.current.getSource('day-mask')) {
+            map.current.getSource('day-mask').setData({
+                type: 'FeatureCollection',
+                features: [dayPolygon]
+            });
+        }
+    }, [nightPolygon, dayPolygon, isMapLoaded]);
 
     // Update Moon Data
     useEffect(() => {
@@ -692,6 +719,29 @@ export default function Map({
         }
 
     }, [layers, mapStyle, moonData, isMapLoaded, weatherLayers, showDateLine]);
+
+    // Adjust night layer opacity for Day/Night Mode
+    useEffect(() => {
+        if (!map.current || !isMapLoaded) return;
+
+        if (map.current.getLayer('night-layer')) {
+            if (dayNightMode) {
+                // Dark overlay in night areas (0.85 = mostly dark but not pure black)
+                map.current.setPaintProperty('night-layer', 'fill-opacity', 0.60);
+            } else {
+                // Semi-transparent overlay for normal terminator view
+                map.current.setPaintProperty('night-layer', 'fill-opacity', 0.5);
+            }
+        }
+
+        // Adjust city lights opacity - lower so base map shows through
+        if (map.current.getLayer('city-lights-layer')) {
+            // In Day/Night mode: low opacity so day areas show base map
+            // City lights will still be visible in night areas (against black background)
+            const cityLightsOpacity = dayNightMode ? 0.4 : 0.8;
+            map.current.setPaintProperty('city-lights-layer', 'raster-opacity', cityLightsOpacity);
+        }
+    }, [dayNightMode, isMapLoaded]);
 
     return (
         <div className="map-wrap absolute inset-0 w-full h-full bg-[#0b0e14]">
