@@ -473,9 +473,10 @@ export default function Map({
                             source: 'moon',
                             layout: {
                                 'icon-image': ['get', 'icon'],
-                                'icon-size': 0.5,
+                                'icon-size': 0.6,
                                 'icon-allow-overlap': true,
-                                'icon-offset': [15, 15],
+                                'icon-anchor': 'center',
+                                'icon-offset': [-15, 0],  // Compensate for image padding
                                 'visibility': layers.moon ? 'visible' : 'none'
                             }
                         });
