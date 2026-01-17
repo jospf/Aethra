@@ -734,11 +734,11 @@ export default function Map({
             }
         }
 
-        // Adjust city lights opacity - lower so base map shows through
+        // Adjust city lights opacity
         if (map.current.getLayer('city-lights-layer')) {
-            // In Day/Night mode: low opacity so day areas show base map
-            // City lights will still be visible in night areas (against black background)
-            const cityLightsOpacity = dayNightMode ? 0.4 : 0.8;
+            // Standalone: high opacity for near-pure Black Marble view
+            // Day/Night mode: lower opacity so day areas show base map
+            const cityLightsOpacity = dayNightMode ? 0.4 : 0.95;
             map.current.setPaintProperty('city-lights-layer', 'raster-opacity', cityLightsOpacity);
         }
     }, [dayNightMode, isMapLoaded]);
