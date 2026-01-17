@@ -20,6 +20,8 @@ Aethra is designed to be lightweight, extensible, and easy to deploy on low-powe
 - **Geological Events**:
   - **Earthquakes**: Live M2.5+ earthquake tracking with pulsing animation for recent events (last 24 hours).
   - **Volcanoes**: Live volcanic activity feed from Smithsonian GVP with color-coded alert levels (red=erupting, orange=active, gray=monitored).
+- **Aviation**:
+  - **Flight Traffic**: Real-time global aircraft positions via OpenSky Network with heading-based rotation and dynamic icons.
 - **Map Customization**: Multiple base map styles (Satellite, Dark, Light, Grey).
 
 ![Clock Interface Demo](assets/clock-interface-demo.png)

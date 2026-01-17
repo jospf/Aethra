@@ -162,4 +162,54 @@ def get_volcanoes():
         return {"type": "FeatureCollection", "features": []}
 
 
-
+@app.get("/api/flights")
+def get_flights():
+    """
+    Get real-time flight data from OpenSky Network
+    Returns GeoJSON of aircraft positions
+    """
+    import requests
+    
+    try:
+        response = requests.get(
+            'https://opensky-network.org/api/states/all',
+            timeout=10
+        )
+        
+        if response.status_code != 200:
+            print(f"OpenSky API error: {response.status_code}")
+            return {"type": "FeatureCollection", "features": []}
+        
+        data = response.json()
+        states = data.get('states', [])
+        
+        features = []
+        for state in states[:500]:  # Limit for performance
+            if state[5] is None or state[6] is None:
+                continue
+            
+            feature = {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [state[5], state[6]]
+                },
+                "properties": {
+                    "icao24": state[0],
+                    "callsign": (state[1] or "").strip(),
+                    "country": state[2],
+                    "altitude": state[7],
+                    "on_ground": state[8],
+                    "velocity": state[9],
+                    "heading": state[10],
+                    "vertical_rate": state[11]
+                }
+            }
+            features.append(feature)
+        
+        print(f"Returning {len(features)} aircraft")
+        return {"type": "FeatureCollection", "features": features}
+        
+    except Exception as e:
+        print(f"Error fetching flights: {e}")
+        return {"type": "FeatureCollection", "features": []}

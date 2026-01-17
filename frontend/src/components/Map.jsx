@@ -6,6 +6,7 @@ import { useWeather } from '../hooks/useWeather';
 import { useAurora } from '../hooks/useAurora';
 import { useEarthquakes } from '../hooks/useEarthquakes';
 import { useVolcanoes } from '../hooks/useVolcanoes';
+import { useFlights } from '../hooks/useFlights';
 import dateLineGeoJson from '../data/dateLine.json';
 
 export default function Map({
@@ -29,6 +30,7 @@ export default function Map({
     const { auroraData } = useAurora();
     const { earthquakeData } = useEarthquakes();
     const { volcanoData } = useVolcanoes();
+    const { flightData } = useFlights();
 
     // Handle FlyTo Focus
     useEffect(() => {
@@ -373,6 +375,64 @@ export default function Map({
                 }
             });
 
+            // 7.5 FLIGHTS LAYER
+            // Create a simple plane icon dynamically
+            const createPlaneIcon = () => {
+                const size = 24;
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+
+                // Draw plane shape (pointing UP/North by default for rotation)
+                ctx.fillStyle = '#38bdf8'; // Sky-400
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1;
+
+                ctx.beginPath();
+                ctx.moveTo(12, 2);  // Nose
+                ctx.lineTo(16, 10); // Right wing tipish
+                ctx.lineTo(22, 14); // Right wing edge
+                ctx.lineTo(12, 12); // Body center
+                ctx.lineTo(2, 14);  // Left wing edge
+                ctx.lineTo(8, 10);  // Left wing tipish
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Tail
+                ctx.beginPath();
+                ctx.moveTo(12, 12);
+                ctx.lineTo(15, 20);
+                ctx.lineTo(9, 20);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                return ctx.getImageData(0, 0, size, size);
+            };
+
+            map.current.addImage('plane-icon', createPlaneIcon(), { pixelRatio: 2 });
+
+            map.current.addSource('flights', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+
+            map.current.addLayer({
+                id: 'flights-layer',
+                type: 'symbol',
+                source: 'flights',
+                layout: {
+                    'icon-image': 'plane-icon',
+                    'icon-size': 0.8,
+                    'icon-rotate': ['get', 'heading'],
+                    'icon-allow-overlap': true,
+                    'icon-rotation-alignment': 'map',
+                    'visibility': 'none'
+                }
+            });
+
             // 8. INTERNATIONAL DATE LINE
             map.current.addSource('date-line', {
                 type: 'geojson',
@@ -549,6 +609,13 @@ export default function Map({
         }
     }, [nightPolygon, dayPolygon, isMapLoaded]);
 
+    // Update Flight Data
+    useEffect(() => {
+        if (map.current && flightData && map.current.getSource('flights')) {
+            map.current.getSource('flights').setData(flightData);
+        }
+    }, [flightData, isMapLoaded]);
+
     // Update Moon Data
     useEffect(() => {
         if (map.current && moonData && map.current.getSource('moon')) {
@@ -712,6 +779,9 @@ export default function Map({
         }
         if (map.current.getLayer('volcanoes-layer')) {
             setVisibility('volcanoes-layer', weatherLayers.volcanoes);
+        }
+        if (map.current.getLayer('flights-layer')) {
+            setVisibility('flights-layer', weatherLayers.flights);
         }
 
         // Date Line

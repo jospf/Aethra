@@ -237,6 +237,25 @@ export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, 
                 </div>
 
                 <div className="mt-6 pt-6 border-t border-white/10">
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-sky-400 to-blue-500 bg-clip-text text-transparent mb-6">
+                        Aviation
+                    </h2>
+
+                    <div className="space-y-6">
+                        {/* Flights Toggle */}
+                        <div className="flex items-center justify-between">
+                            <span className="text-gray-300 font-medium tracking-wide">Flight Traffic</span>
+                            <button
+                                onClick={() => toggleWeatherLayer('flights')}
+                                className={`w-12 h-6 rounded-full transition-colors relative ${weatherLayers.flights ? 'bg-sky-500' : 'bg-gray-700'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${weatherLayers.flights ? 'translate-x-6' : 'translate-x-0'}`} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-white/10">
                     <h2 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent mb-6">
                         Geographical Features
                     </h2>

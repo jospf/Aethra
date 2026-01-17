@@ -19,6 +19,7 @@ function App() {
         aurora: false,
         earthquakes: false,
         volcanoes: false,
+        flights: false,
         clouds: false,
         temperature: false
     });
