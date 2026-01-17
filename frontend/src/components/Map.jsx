@@ -274,39 +274,59 @@ export default function Map({
                 data: { type: 'FeatureCollection', features: [] }
             });
 
-            // Generate Red Triangle Icon
-            const width = 24;
-            const height = 24;
-            const img = new Image(width, height);
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
+            // Generate Triangle Icons with different colors
+            const createTriangleIcon = (fillColor, borderColor, iconName) => {
+                const width = 24;
+                const height = 24;
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
 
-            // Draw Triangle
-            ctx.fillStyle = '#dc2626'; // Red-600
-            ctx.strokeStyle = '#7f1d1d'; // Red-900 (Border)
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(width / 2, 2); // Top
-            ctx.lineTo(width - 2, height - 2); // Bottom Right
-            ctx.lineTo(2, height - 2); // Bottom Left
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
+                // Draw Triangle
+                ctx.fillStyle = fillColor;
+                ctx.strokeStyle = borderColor;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(width / 2, 2); // Top
+                ctx.lineTo(width - 2, height - 2); // Bottom Right
+                ctx.lineTo(2, height - 2); // Bottom Left
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
 
-            const imageData = ctx.getImageData(0, 0, width, height);
-            if (!map.current.hasImage('volcano-icon')) {
-                map.current.addImage('volcano-icon', imageData);
-            }
+                const imageData = ctx.getImageData(0, 0, width, height);
+                if (!map.current.hasImage(iconName)) {
+                    map.current.addImage(iconName, imageData);
+                }
+            };
+
+            // Create icons for different alert levels
+            createTriangleIcon('#dc2626', '#7f1d1d', 'volcano-high');    // Red - High alert (Erupting)
+            createTriangleIcon('#f97316', '#c2410c', 'volcano-medium');  // Orange - Medium alert (Active/Restless)
+            createTriangleIcon('#9ca3af', '#6b7280', 'volcano-low');     // Gray - Low alert (Monitored)
 
             map.current.addLayer({
                 id: 'volcanoes-layer',
                 type: 'symbol',
                 source: 'volcanoes',
                 layout: {
-                    'icon-image': 'volcano-icon',
-                    'icon-size': 0.8,
+                    // Use data-driven icon selection based on alert_level
+                    'icon-image': [
+                        'match',
+                        ['get', 'alert_level'],
+                        'high', 'volcano-high',
+                        'medium', 'volcano-medium',
+                        'volcano-low'  // default
+                    ],
+                    // Slightly larger icons for high alert
+                    'icon-size': [
+                        'match',
+                        ['get', 'alert_level'],
+                        'high', 1.0,
+                        'medium', 0.85,
+                        0.7  // default (low)
+                    ],
                     'icon-allow-overlap': true,
                     'visibility': 'none'
                 }

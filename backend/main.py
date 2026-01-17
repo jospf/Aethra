@@ -93,23 +93,73 @@ def get_iss_position():
         "longitude": subpoint.longitude.degrees
     }
 
+
 @app.get("/api/volcanoes")
 def get_volcanoes():
     """
-    Get volcano data as GeoJSON
-    Returns static list of active/notable volcanoes
+    Get volcano data as GeoJSON enriched with real-time activity from GVP Weekly Report
     """
     try:
-        # Load volcanoes.json from the same directory as main.py
+        # Load base volcano data from volcanoes.json
         volcano_file_path = os.path.join(os.path.dirname(__file__), 'volcanoes.json')
         
         with open(volcano_file_path, 'r') as f:
             volcano_data = json.load(f)
         
+        # Fetch current volcanic activity from GVP RSS
+        try:
+            import feedparser
+            
+            gvp_rss_url = 'https://volcano.si.edu/news/WeeklyVolcanoRSS.xml'
+            feed = feedparser.parse(gvp_rss_url)
+            
+            # Extract volcano names from RSS entries
+            active_volcanoes = set()
+            for entry in feed.entries:
+                # Entry title format: "Volcano Name (Country) - Activity Description"
+                title = entry.get('title', '')
+                if ' (' in title:
+                    volcano_name = title.split(' (')[0].strip()
+                    active_volcanoes.add(volcano_name.lower())
+            
+            # Enrich volcano data with current status
+            for feature in volcano_data['features']:
+                volcano_name = feature['properties'].get('name', '').lower()
+                
+                # If volcano is in the GVP weekly report, mark as erupting
+                if volcano_name in active_volcanoes:
+                    feature['properties']['status'] = 'Erupting'
+                    feature['properties']['alert_level'] = 'high'
+                # Otherwise keep existing status or mark as monitored
+                elif feature['properties'].get('status') == 'Erupting':
+                    # Downgrade if not in current reports
+                    feature['properties']['status'] = 'Active'
+                    feature['properties']['alert_level'] = 'medium'
+                else:
+                    feature['properties']['alert_level'] = 'low'
+            
+            print(f"Successfully enriched volcano data with {len(active_volcanoes)} active volcanoes from GVP")
+            
+        except Exception as rss_error:
+            print(f"Warning: Could not fetch GVP RSS feed: {rss_error}")
+            # Continue with static data if RSS fails
+            for feature in volcano_data['features']:
+                # Set default alert levels based on existing status
+                status = feature['properties'].get('status', 'Monitored')
+                if status == 'Erupting':
+                    feature['properties']['alert_level'] = 'high'
+                elif status in ['Active', 'Restless']:
+                    feature['properties']['alert_level'] = 'medium'
+                else:
+                    feature['properties']['alert_level'] = 'low'
+        
         return volcano_data
+        
     except FileNotFoundError:
         return {"type": "FeatureCollection", "features": []}
     except Exception as e:
         print(f"Error loading volcano data: {e}")
         return {"type": "FeatureCollection", "features": []}
+
+
 

@@ -114,6 +114,35 @@ function App() {
                             System Online
                         </span>
                     </div>
+
+                    {/* Volcano Legend - Only show when volcanoes are active */}
+                    {weatherLayers.volcanoes && (
+                        <div className="mt-2 bg-slate-900/80 backdrop-blur-md px-3 py-2 rounded-lg border border-white/10 shadow-2xl">
+                            <div className="text-[9px] font-semibold tracking-widest text-cyan-400/60 uppercase mb-1.5">
+                                Volcanic Activity
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-2">
+                                    <svg width="12" height="12" viewBox="0 0 24 24">
+                                        <path d="M12 2 L22 22 L2 22 Z" fill="#dc2626" stroke="#7f1d1d" strokeWidth="2" />
+                                    </svg>
+                                    <span className="text-[10px] text-gray-300">Erupting (High)</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <svg width="12" height="12" viewBox="0 0 24 24">
+                                        <path d="M12 2 L22 22 L2 22 Z" fill="#f97316" stroke="#c2410c" strokeWidth="2" />
+                                    </svg>
+                                    <span className="text-[10px] text-gray-300">Active (Medium)</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <svg width="12" height="12" viewBox="0 0 24 24">
+                                        <path d="M12 2 L22 22 L2 22 Z" fill="#9ca3af" stroke="#6b7280" strokeWidth="2" />
+                                    </svg>
+                                    <span className="text-[10px] text-gray-300">Monitored (Low)</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Clock Widgets */}

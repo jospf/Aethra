@@ -2,3 +2,5 @@ fastapi
 uvicorn
 skyfield
 pydantic
+feedparser
+requests
