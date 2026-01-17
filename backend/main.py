@@ -93,7 +93,60 @@ def get_iss_position():
         "longitude": subpoint.longitude.degrees
     }
 
+@app.get("/api/satellites/{group}")
+def get_satellites(group: str):
+    """
+    Get positions for a satellite group (gps, iridium, starlink)
+    Returns GeoJSON FeatureCollection
+    """
+    urls = {
+        'gps': 'https://celestrak.org/NORAD/elements/gp.php?GROUP=gps-ops&FORMAT=tle',
+        'iridium': 'https://celestrak.org/NORAD/elements/gp.php?GROUP=iridium&FORMAT=tle',
+        'starlink': 'https://celestrak.org/NORAD/elements/gp.php?GROUP=starlink&FORMAT=tle',
+        'iss': 'http://celestrak.org/NORAD/elements/stations.txt' # Fallback or specific
+    }
+    
+    if group not in urls:
+        return {"error": "Invalid group. Options: gps, iridium, starlink"}
+        
+    try:
+        url = urls[group]
+        # skyfield load.tle_file caches results, which is good
+        satellites = load.tle_file(url)
+        
+        features = []
+        t = ts.now()
+        
+        for sat in satellites:
+            try:
+                geocentric = sat.at(t)
+                subpoint = wgs84.subpoint(geocentric)
+                
+                # Filter out objects that fail propagation or are decayed
+                if subpoint.latitude.degrees is None: 
+                    continue
+                    
+                feature = {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [subpoint.longitude.degrees, subpoint.latitude.degrees]
+                    },
+                    "properties": {
+                        "name": sat.name,
+                        "id": sat.model.satnum,
+                        "altitude_km": subpoint.elevation.km
+                    }
+                }
+                features.append(feature)
+            except Exception:
+                continue
 
+        return {"type": "FeatureCollection", "features": features}
+
+    except Exception as e:
+        print(f"Error fetching satellite group {group}: {e}")
+        return {"type": "FeatureCollection", "features": []}
 @app.get("/api/volcanoes")
 def get_volcanoes():
     """

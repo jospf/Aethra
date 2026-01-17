@@ -305,6 +305,36 @@ export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, 
                 </div>
 
                 <div className="mt-6 pt-6 border-t border-white/10">
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-fuchsia-400 to-rose-500 bg-clip-text text-transparent mb-6">
+                        Satellites
+                    </h2>
+
+                    <div className="space-y-6">
+                        {/* GPS Toggle */}
+                        <div className="flex items-center justify-between">
+                            <span className="text-gray-300 font-medium tracking-wide">GPS (MEO)</span>
+                            <button
+                                onClick={() => toggleWeatherLayer('gps')}
+                                className={`w-12 h-6 rounded-full transition-colors relative ${weatherLayers.gps ? 'bg-amber-400' : 'bg-gray-700'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${weatherLayers.gps ? 'translate-x-6' : 'translate-x-0'}`} />
+                            </button>
+                        </div>
+
+                        {/* Iridium Toggle */}
+                        <div className="flex items-center justify-between">
+                            <span className="text-gray-300 font-medium tracking-wide">Iridium (LEO)</span>
+                            <button
+                                onClick={() => toggleWeatherLayer('iridium')}
+                                className={`w-12 h-6 rounded-full transition-colors relative ${weatherLayers.iridium ? 'bg-pink-500' : 'bg-gray-700'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${weatherLayers.iridium ? 'translate-x-6' : 'translate-x-0'}`} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-white/10">
                     <h2 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent mb-6">
                         Clock Control
                     </h2>

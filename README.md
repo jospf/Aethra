@@ -25,6 +25,9 @@ Aethra is designed to be lightweight, extensible, and easy to deploy on low-powe
   - **Maritime Traffic**: Live ship positions via AisStream.io WebSocket integration (requires free API key).
 - **Infrastructure**:
   - **Submarine Cables**: Visualization of the global fiber optic network connecting continents.
+- **Satellites (Orbital Traffic)**:
+  - **GPS Constellation**: Real-time tracking of Global Positioning System satellites (MEO).
+  - **Iridium Constellation**: Real-time tracking of Iridium communication satellites (LEO).
 - **Map Customization**: Multiple base map styles (Satellite, Dark, Light, Grey).
 
 ![Clock Interface Demo](assets/clock-interface-demo.png)

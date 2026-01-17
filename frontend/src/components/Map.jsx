@@ -8,6 +8,7 @@ import { useEarthquakes } from '../hooks/useEarthquakes';
 import { useVolcanoes } from '../hooks/useVolcanoes';
 import { useFlights } from '../hooks/useFlights';
 import { useShips } from '../hooks/useShips';
+import { useSatellites } from '../hooks/useSatellites';
 import dateLineGeoJson from '../data/dateLine.json';
 import cablesGeoJson from '../data/cables.json';
 
@@ -34,6 +35,8 @@ export default function Map({
     const { volcanoData } = useVolcanoes();
     const { flightData } = useFlights();
     const { shipData } = useShips();
+    const { data: gpsData } = useSatellites('gps');
+    const { data: iridiumData } = useSatellites('iridium');
 
     // Handle FlyTo Focus
     useEffect(() => {
@@ -504,6 +507,47 @@ export default function Map({
                 }
             });
 
+            // 7.9 SATELLITE LAYERS (GPS & IRIDIUM)
+            // GPS (Medium Earth Orbit)
+            map.current.addSource('gps', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+            map.current.addLayer({
+                id: 'gps-layer',
+                type: 'circle',
+                source: 'gps',
+                paint: {
+                    'circle-radius': 3.5,
+                    'circle-color': '#facc15', // Yellow/Gold
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': '#ffffff'
+                },
+                layout: {
+                    'visibility': 'none'
+                }
+            });
+
+            // Iridium (Low Earth Orbit)
+            map.current.addSource('iridium', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+            map.current.addLayer({
+                id: 'iridium-layer',
+                type: 'circle',
+                source: 'iridium',
+                paint: {
+                    'circle-radius': 2.5,
+                    'circle-color': '#ec4899', // Pink
+                    'circle-stroke-width': 0,
+                    'circle-opacity': 0.8
+                },
+                layout: {
+                    'visibility': 'none'
+                }
+            });
+
             map.current.addSource('date-line', {
                 type: 'geojson',
                 data: dateLineGeoJson
@@ -693,6 +737,20 @@ export default function Map({
         }
     }, [shipData, isMapLoaded]);
 
+    // Update GPS Data
+    useEffect(() => {
+        if (map.current && gpsData && map.current.getSource('gps')) {
+            map.current.getSource('gps').setData(gpsData);
+        }
+    }, [gpsData, isMapLoaded]);
+
+    // Update Iridium Data
+    useEffect(() => {
+        if (map.current && iridiumData && map.current.getSource('iridium')) {
+            map.current.getSource('iridium').setData(iridiumData);
+        }
+    }, [iridiumData, isMapLoaded]);
+
     // Update Moon Data
     useEffect(() => {
         if (map.current && moonData && map.current.getSource('moon')) {
@@ -838,6 +896,13 @@ export default function Map({
         setVisibility('moon-layer', layers.moon);
         setVisibility('moon-glow', layers.moon);
         setVisibility('iss-layer', layers.iss);
+
+        if (map.current.getLayer('gps-layer')) {
+            setVisibility('gps-layer', weatherLayers.gps);
+        }
+        if (map.current.getLayer('iridium-layer')) {
+            setVisibility('iridium-layer', weatherLayers.iridium);
+        }
 
         // Weather
         if (map.current.getLayer('rain-layer')) {

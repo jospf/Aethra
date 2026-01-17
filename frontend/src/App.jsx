@@ -22,6 +22,8 @@ function App() {
         flights: false,
         ships: false,
         cables: false,
+        gps: false,
+        iridium: false,
         clouds: false,
         temperature: false
     });
