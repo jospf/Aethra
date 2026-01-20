@@ -21,13 +21,13 @@ Aethra is designed to be lightweight, extensible, and easy to deploy on low-powe
   - **Earthquakes**: Live M2.5+ earthquake tracking with pulsing animation for recent events (last 24 hours).
   - **Volcanoes**: Live volcanic activity feed from Smithsonian GVP with color-coded alert levels (red=erupting, orange=active, gray=monitored).
 - **Global Traffic**:
-  - **Flight Traffic**: Real-time global aircraft positions via OpenSky Network with heading-based rotation and dynamic icons.
+  - ~~**Flight Traffic**~~: *(Temporarily disabled - OpenSky rate limiting)*
   - **Maritime Traffic**: Live ship positions via AisStream.io WebSocket integration (requires free API key).
 - **Infrastructure**:
   - **Submarine Cables**: Visualization of the global fiber optic network connecting continents.
-- **Satellites (Orbital Traffic)**:
-  - **GPS Constellation**: Real-time tracking of Global Positioning System satellites (MEO).
-  - **Iridium Constellation**: Real-time tracking of Iridium communication satellites (LEO).
+- ~~**Satellites (Orbital Traffic)**~~: *(Temporarily disabled - network connectivity issues)*
+  - ~~**GPS Constellation**~~
+  - ~~**Iridium Constellation**~~
 - **Map Customization**: Multiple base map styles (Satellite, Dark, Light, Grey).
 
 ![Clock Interface Demo](assets/clock-interface-demo.png)

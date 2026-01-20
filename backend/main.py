@@ -1,9 +1,10 @@
 from fastapi import FastAPI
-from skyfield.api import load, wgs84
+from skyfield.api import load, wgs84, EarthSatellite
 from skyfield import almanac
 from datetime import datetime, timezone
 import json
 import os
+import requests
 
 app = FastAPI()
 
@@ -103,7 +104,6 @@ def get_satellites(group: str):
         'gps': 'https://celestrak.org/NORAD/elements/gp.php?GROUP=gps-ops&FORMAT=tle',
         'iridium': 'https://celestrak.org/NORAD/elements/gp.php?GROUP=iridium&FORMAT=tle',
         'starlink': 'https://celestrak.org/NORAD/elements/gp.php?GROUP=starlink&FORMAT=tle',
-        'iss': 'http://celestrak.org/NORAD/elements/stations.txt' # Fallback or specific
     }
     
     if group not in urls:
@@ -111,8 +111,9 @@ def get_satellites(group: str):
         
     try:
         url = urls[group]
-        # skyfield load.tle_file caches results, which is good
-        satellites = load.tle_file(url)
+        # Use explicit unique filename per group to prevent cache contamination
+        cache_filename = f'tle_{group}.txt'
+        satellites = load.tle_file(url, filename=cache_filename)
         
         features = []
         t = ts.now()
@@ -122,7 +123,6 @@ def get_satellites(group: str):
                 geocentric = sat.at(t)
                 subpoint = wgs84.subpoint(geocentric)
                 
-                # Filter out objects that fail propagation or are decayed
                 if subpoint.latitude.degrees is None: 
                     continue
                     
@@ -142,6 +142,7 @@ def get_satellites(group: str):
             except Exception:
                 continue
 
+        print(f"[{group}] Loaded {len(features)} satellites")
         return {"type": "FeatureCollection", "features": features}
 
     except Exception as e:

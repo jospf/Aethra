@@ -8,7 +8,7 @@ import { useEarthquakes } from '../hooks/useEarthquakes';
 import { useVolcanoes } from '../hooks/useVolcanoes';
 import { useFlights } from '../hooks/useFlights';
 import { useShips } from '../hooks/useShips';
-import { useSatellites } from '../hooks/useSatellites';
+// import { useSatellites } from '../hooks/useSatellites'; // Temporarily disabled - network issues
 import dateLineGeoJson from '../data/dateLine.json';
 import cablesGeoJson from '../data/cables.json';
 
@@ -33,10 +33,10 @@ export default function Map({
     const { auroraData } = useAurora();
     const { earthquakeData } = useEarthquakes();
     const { volcanoData } = useVolcanoes();
-    const { flightData } = useFlights();
+    // const { flightData } = useFlights(); // Temporarily disabled - OpenSky rate limiting
     const { shipData } = useShips();
-    const { data: gpsData } = useSatellites('gps');
-    const { data: iridiumData } = useSatellites('iridium');
+    // const { data: gpsData } = useSatellites('gps'); // Temporarily disabled - network issues
+    // const { data: iridiumData } = useSatellites('iridium'); // Temporarily disabled - network issues
 
     // Handle FlyTo Focus
     useEffect(() => {
@@ -723,12 +723,12 @@ export default function Map({
         }
     }, [nightPolygon, dayPolygon, isMapLoaded]);
 
-    // Update Flight Data
-    useEffect(() => {
-        if (map.current && flightData && map.current.getSource('flights')) {
-            map.current.getSource('flights').setData(flightData);
-        }
-    }, [flightData, isMapLoaded]);
+    // Update Flight Data - Temporarily disabled
+    // useEffect(() => {
+    //     if (map.current && flightData && map.current.getSource('flights')) {
+    //         map.current.getSource('flights').setData(flightData);
+    //     }
+    // }, [flightData, isMapLoaded]);
 
     // Update Ship Data
     useEffect(() => {
@@ -737,19 +737,19 @@ export default function Map({
         }
     }, [shipData, isMapLoaded]);
 
-    // Update GPS Data
-    useEffect(() => {
-        if (map.current && gpsData && map.current.getSource('gps')) {
-            map.current.getSource('gps').setData(gpsData);
-        }
-    }, [gpsData, isMapLoaded]);
+    // Update GPS Data - Temporarily disabled
+    // useEffect(() => {
+    //     if (map.current && gpsData && map.current.getSource('gps')) {
+    //         map.current.getSource('gps').setData(gpsData);
+    //     }
+    // }, [gpsData, isMapLoaded]);
 
-    // Update Iridium Data
-    useEffect(() => {
-        if (map.current && iridiumData && map.current.getSource('iridium')) {
-            map.current.getSource('iridium').setData(iridiumData);
-        }
-    }, [iridiumData, isMapLoaded]);
+    // Update Iridium Data - Temporarily disabled
+    // useEffect(() => {
+    //     if (map.current && iridiumData && map.current.getSource('iridium')) {
+    //         map.current.getSource('iridium').setData(iridiumData);
+    //     }
+    // }, [iridiumData, isMapLoaded]);
 
     // Update Moon Data
     useEffect(() => {
