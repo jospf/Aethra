@@ -3,7 +3,10 @@ import Map from './components/Map'
 import { ClockWidget } from './components/widgets/ClockWidget'
 import { useMoon } from './hooks/useMoon';
 import { useISS } from './hooks/useISS';
+import { useEarthquakes } from './hooks/useEarthquakes';
+import { useVolcanoes } from './hooks/useVolcanoes';
 import Sidebar from './components/ui/Sidebar';
+import Ticker from './components/ui/Ticker';
 
 function App() {
     const [mapStyle, setMapStyle] = useState('satellite');
@@ -31,6 +34,8 @@ function App() {
     const [dayNightMode, setDayNightMode] = useState(false);
     const { moonData } = useMoon();
     const issData = useISS();
+    const { earthquakeData } = useEarthquakes();
+    const { volcanoData } = useVolcanoes();
 
     // Auto-sync layers when Day/Night Mode is toggled
     useEffect(() => {
@@ -96,6 +101,8 @@ function App() {
                     weatherLayers={weatherLayers}
                     moonData={moonData}
                     issData={issData}
+                    earthquakeData={earthquakeData}
+                    volcanoData={volcanoData}
                     focusLocation={focusLocation}
                     dayNightMode={dayNightMode}
                 />
@@ -174,11 +181,19 @@ function App() {
             </header>
 
             {/* Footer Overlay */}
-            <footer className="absolute bottom-0 left-0 w-full z-10 p-4 flex justify-between items-end pointer-events-none">
+            <footer className="absolute bottom-10 left-0 w-full z-10 p-4 flex justify-between items-end pointer-events-none">
                 <div className="text-[10px] text-white/30 tracking-wider font-light">
                     © 2026 AETHRA COMMAND • GEOSPATIAL INTELLIGENCE
                 </div>
             </footer>
+
+            {/* Ticker Overlay */}
+            <Ticker
+                earthquakeData={earthquakeData}
+                volcanoData={volcanoData}
+                moonData={moonData}
+                issData={issData}
+            />
         </div>
     );
 }

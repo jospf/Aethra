@@ -4,8 +4,6 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { useTerminator } from '../hooks/useTerminator';
 import { useWeather } from '../hooks/useWeather';
 import { useAurora } from '../hooks/useAurora';
-import { useEarthquakes } from '../hooks/useEarthquakes';
-import { useVolcanoes } from '../hooks/useVolcanoes';
 import { useFlights } from '../hooks/useFlights';
 import { useShips } from '../hooks/useShips';
 // import { useSatellites } from '../hooks/useSatellites'; // Temporarily disabled - network issues
@@ -19,6 +17,8 @@ export default function Map({
     weatherLayers = { precipitation: false, clouds: false, temperature: false },
     moonData,
     issData,
+    earthquakeData,
+    volcanoData,
     focusLocation,
     dayNightMode = false
 }) {
@@ -31,8 +31,6 @@ export default function Map({
     const { nightPolygon, dayPolygon } = useTerminator();
     const { radarPath } = useWeather();
     const { auroraData } = useAurora();
-    const { earthquakeData } = useEarthquakes();
-    const { volcanoData } = useVolcanoes();
     // const { flightData } = useFlights(); // Temporarily disabled - OpenSky rate limiting
     const { shipData } = useShips();
     // const { data: gpsData } = useSatellites('gps'); // Temporarily disabled - network issues
@@ -650,7 +648,7 @@ export default function Map({
                                 'icon-size': 0.6,
                                 'icon-allow-overlap': true,
                                 'icon-anchor': 'center',
-                                'icon-offset': [-15, 0],  // Compensate for image padding
+                                'icon-offset': [0, 0],
                                 'visibility': layers.moon ? 'visible' : 'none'
                             }
                         });

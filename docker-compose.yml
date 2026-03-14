@@ -1,8 +1,7 @@
 services:
   backend:
     build: ./backend
-    ports:
-      - "8000:8000"
+    network_mode: "host"
     volumes:
       - ./backend:/app
     environment:
@@ -10,8 +9,7 @@ services:
 
   frontend:
     build: ./frontend
-    ports:
-      - "3000:5173"  # Vite default port mapped to 3000
+    network_mode: "host"
     volumes:
       - ./frontend:/app
       - /app/node_modules
