@@ -29,7 +29,7 @@ export default function Map({
     const mapTop = useRef(null);
     const layersRef = useRef(layers);
     const dayNightModeRef = useRef(dayNightMode);
-    const nightPolygonRef = useRef(nightPolygon);
+    const nightPolygonRef = useRef(null);
     const updateClipPathRef = useRef(null);
 
     useEffect(() => {
