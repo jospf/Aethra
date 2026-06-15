@@ -25,3 +25,10 @@ body {
 .animate-marquee:hover {
     animation-play-state: paused;
 }
+
+/* Ensure the top map and all its children NEVER intercept pointer events */
+.top-map-container,
+.top-map-container * {
+    pointer-events: none !important;
+}
+

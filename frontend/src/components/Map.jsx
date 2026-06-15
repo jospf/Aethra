@@ -118,10 +118,34 @@ export default function Map({
         }
 
         try {
+            const centerLng = mapBottom.current.getCenter().lng;
+            const offset = Math.round(centerLng / 360) * 360;
             const coords = currentPolygon.geometry.coordinates[0];
+            
+            // Extract the active terminator points (all except the wrapping points)
+            const terminatorPoints = coords.slice(0, -3);
+            const leftTerminator = terminatorPoints.map(p => [p[0] - 360, p[1]]);
+            const rightTerminator = terminatorPoints.map(p => [p[0] + 360, p[1]]);
+            
+            const combinedTerminator = [
+                ...leftTerminator,
+                ...terminatorPoints,
+                ...rightTerminator
+            ];
+            
+            const wrapViaNorth = currentPolygon.properties?.wrapViaNorth !== false;
+            const wrapLat = wrapViaNorth ? 85 : -85;
+            
+            const combinedPolygon = [
+                ...combinedTerminator,
+                [540, wrapLat],
+                [-540, wrapLat],
+                combinedTerminator[0]
+            ];
+
             let hasInvalid = false;
-            const points = coords.map(coord => {
-                const projected = mapBottom.current.project(coord);
+            const points = combinedPolygon.map(coord => {
+                const projected = mapBottom.current.project([coord[0] + offset, coord[1]]);
                 if (!projected || !isFinite(projected.x) || !isFinite(projected.y)) {
                     hasInvalid = true;
                     return '';
@@ -768,7 +792,7 @@ export default function Map({
         // Bottom Map (Base + Vector overlays)
         mapBottom.current = new maplibregl.Map({
             container: mapBottomContainer.current,
-            renderWorldCopies: false,
+            renderWorldCopies: true,
             style: {
                 version: 8,
                 glyphs: 'https://fonts.openmaptiles.org/{fontstack}/{range}.pbf',
@@ -850,7 +874,7 @@ export default function Map({
         // Top Map (City Lights / Night background + Vector overlays)
         mapTop.current = new maplibregl.Map({
             container: mapTopContainer.current,
-            renderWorldCopies: false,
+            renderWorldCopies: true,
             style: {
                 version: 8,
                 glyphs: 'https://fonts.openmaptiles.org/{fontstack}/{range}.pbf',
@@ -1152,7 +1176,7 @@ export default function Map({
             {/* Top Map (City lights map representing night) */}
             <div 
                 ref={mapTopContainer} 
-                className="map w-full h-full absolute inset-0 transition-opacity duration-300"
+                className="map w-full h-full absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-300 top-map-container"
             />
         </div>
     );
