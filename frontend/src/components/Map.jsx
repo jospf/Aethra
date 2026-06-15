@@ -1339,13 +1339,15 @@ export default function Map({
 
         try {
             const centerLng = mapBottom.current.getCenter().lng;
-            const N = Math.round((centerLng - 180) / 360);
-            const idlLng = 180 + N * 360;
+            const idlLngRaw = -172.5; // Political IDL longitude in the South Pacific (near Australia)
+            const N = Math.round((centerLng - idlLngRaw) / 360);
+            const idlLng = idlLngRaw + N * 360;
             
-            const mapCenter = mapBottom.current.getCenter();
-            const idlProjected = mapBottom.current.project([idlLng, mapCenter.lat]);
+            const idlProjected = mapBottom.current.project([idlLng, -30]); // Geographically lock to latitude -30 S
             
-            if (idlProjected && idlProjected.x >= -100 && idlProjected.x <= window.innerWidth + 100) {
+            if (idlProjected && 
+                idlProjected.x >= -100 && idlProjected.x <= window.innerWidth + 100 &&
+                idlProjected.y >= -100 && idlProjected.y <= window.innerHeight + 100) {
                 const now = new Date();
                 const nowMs = now.getTime();
                 
@@ -1449,11 +1451,11 @@ export default function Map({
                     <div
                         style={{
                             position: 'absolute',
-                            left: `${idlDays.x - 12}px`,
+                            left: `${idlDays.x - 8}px`,
                             top: `${idlDays.y}px`,
                             transform: 'translate(-100%, -50%)',
                         }}
-                        className="bg-slate-950/85 backdrop-blur-md px-5 py-3 rounded-xl border border-cyan-500/20 shadow-[0_0_20px_rgba(6,182,212,0.12)] text-[18px] font-mono font-bold text-cyan-400 tracking-wider flex items-center gap-2 select-none"
+                        className="bg-slate-950/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-cyan-500/25 shadow-[0_0_12px_rgba(6,182,212,0.1)] text-[13px] font-mono font-bold text-cyan-400 tracking-wider flex items-center gap-1.5 select-none"
                     >
                         <span>◀</span>
                         <span>{idlDays.leftDay}</span>
@@ -1463,11 +1465,11 @@ export default function Map({
                     <div
                         style={{
                             position: 'absolute',
-                            left: `${idlDays.x + 12}px`,
+                            left: `${idlDays.x + 8}px`,
                             top: `${idlDays.y}px`,
                             transform: 'translate(0, -50%)',
                         }}
-                        className="bg-slate-950/85 backdrop-blur-md px-5 py-3 rounded-xl border border-cyan-500/20 shadow-[0_0_20px_rgba(6,182,212,0.12)] text-[18px] font-mono font-bold text-cyan-400 tracking-wider flex items-center gap-2 select-none"
+                        className="bg-slate-950/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-cyan-500/25 shadow-[0_0_12px_rgba(6,182,212,0.1)] text-[13px] font-mono font-bold text-cyan-400 tracking-wider flex items-center gap-1.5 select-none"
                     >
                         <span>{idlDays.rightDay}</span>
                         <span>▶</span>
