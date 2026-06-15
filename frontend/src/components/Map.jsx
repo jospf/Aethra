@@ -28,16 +28,28 @@ export default function Map({
     const mapBottom = useRef(null);
     const mapTop = useRef(null);
     const layersRef = useRef(layers);
+    const dayNightModeRef = useRef(dayNightMode);
+    const nightPolygonRef = useRef(nightPolygon);
+    const updateClipPathRef = useRef(null);
 
     useEffect(() => {
         layersRef.current = layers;
     }, [layers]);
+
+    useEffect(() => {
+        dayNightModeRef.current = dayNightMode;
+    }, [dayNightMode]);
+
+    useEffect(() => {
+        nightPolygonRef.current = nightPolygon;
+    }, [nightPolygon]);
 
     const [lng] = useState(0);
     const [lat] = useState(0);
     const [zoom] = useState(1.5); // Start zoomed out for global view
     const [isBottomMapLoaded, setIsBottomMapLoaded] = useState(false);
     const [isTopMapLoaded, setIsTopMapLoaded] = useState(false);
+    const [debugError, setDebugError] = useState('None');
 
     const { nightPolygon, dayPolygon } = useTerminator();
     const { radarPath } = useWeather();
@@ -91,42 +103,60 @@ export default function Map({
             return;
         }
 
-        if (!dayNightMode) {
+        const activeMode = dayNightModeRef.current;
+        const currentPolygon = nightPolygonRef.current;
+
+        if (!activeMode) {
             mapTopContainer.current.style.clipPath = 'none';
             mapTopContainer.current.style.webkitClipPath = 'none';
+            if (debugError !== 'None') setDebugError('None');
             return;
         }
 
-        if (!nightPolygon) {
+        if (!currentPolygon) {
             mapTopContainer.current.style.clipPath = 'none';
             mapTopContainer.current.style.webkitClipPath = 'none';
+            if (debugError !== 'nightPolygon missing') setDebugError('nightPolygon missing');
             return;
         }
 
         try {
-            const coords = nightPolygon.geometry.coordinates[0];
-            let hasNaN = false;
+            const coords = currentPolygon.geometry.coordinates[0];
+            let hasInvalid = false;
             const points = coords.map(coord => {
                 const projected = mapBottom.current.project(coord);
-                if (!projected || isNaN(projected.x) || isNaN(projected.y)) {
-                    hasNaN = true;
+                if (!projected || !isFinite(projected.x) || !isFinite(projected.y)) {
+                    hasInvalid = true;
                     return '';
                 }
                 return `${projected.x.toFixed(1)}px ${projected.y.toFixed(1)}px`;
             });
 
-            if (hasNaN) {
-                requestAnimationFrame(updateClipPath);
+            if (hasInvalid) {
+                if (debugError !== 'Invalid coords (NaN/Infinity)') {
+                    setDebugError('Invalid coords (NaN/Infinity)');
+                }
+                requestAnimationFrame(() => {
+                    if (updateClipPathRef.current) updateClipPathRef.current();
+                });
                 return;
             }
 
             const clipPathVal = `polygon(${points.join(', ')})`;
             mapTopContainer.current.style.clipPath = clipPathVal;
             mapTopContainer.current.style.webkitClipPath = clipPathVal;
+            if (debugError !== 'Success') {
+                setDebugError('Success');
+            }
         } catch (err) {
             console.error('Error updating clip-path:', err);
+            if (debugError !== err.message) {
+                setDebugError(err.message);
+            }
         }
     };
+
+    updateClipPathRef.current = updateClipPath;
 
     // Setup function for vector icons
     const setupVolcanoIcons = (map) => {
@@ -871,14 +901,20 @@ export default function Map({
                     pitch: mapBottom.current.getPitch()
                 });
             }
-            updateClipPath();
+            if (updateClipPathRef.current) {
+                updateClipPathRef.current();
+            }
         };
 
         mapBottom.current.on('move', onBottomMapMove);
         mapBottom.current.on('zoom', onBottomMapMove);
         mapBottom.current.on('rotate', onBottomMapMove);
         mapBottom.current.on('pitch', onBottomMapMove);
-        mapBottom.current.on('render', updateClipPath);
+        mapBottom.current.on('render', () => {
+            if (updateClipPathRef.current) {
+                updateClipPathRef.current();
+            }
+        });
 
         mapBottom.current.on('load', () => {
             setupMapLayers(mapBottom.current);
@@ -1130,6 +1166,35 @@ export default function Map({
                 ref={mapTopContainer} 
                 className="map w-full h-full absolute inset-0 transition-opacity duration-300"
             />
+
+            {/* Telemetry Debug Panel */}
+            <div 
+                style={{
+                    position: 'absolute',
+                    bottom: '24px',
+                    left: '24px',
+                    zIndex: 9999,
+                    background: 'rgba(15, 23, 42, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(6, 182, 212, 0.3)',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    fontFamily: 'monospace',
+                    fontSize: '11px',
+                    color: '#22d3ee',
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
+                    pointerEvents: 'none',
+                    lineHeight: '1.5'
+                }}
+            >
+                <div style={{ fontWeight: 'bold', borderBottom: '1px solid rgba(6, 182, 212, 0.2)', marginBottom: '4px', paddingBottom: '2px' }}>Aethra Telemetry Debug</div>
+                <div>Bottom Loaded: {isBottomMapLoaded ? 'YES' : 'NO'}</div>
+                <div>Top Loaded: {isTopMapLoaded ? 'YES' : 'NO'}</div>
+                <div>Day/Night Mode: {dayNightMode ? 'ACTIVE' : 'INACTIVE'}</div>
+                <div>Night Poly Points: {nightPolygon ? nightPolygon.geometry.coordinates[0].length : 0}</div>
+                <div>Clip Path: {mapTopContainer.current?.style?.clipPath ? (mapTopContainer.current.style.clipPath === 'none' ? 'NONE' : 'SET (' + mapTopContainer.current.style.clipPath.length + ' chars)') : 'N/A'}</div>
+                <div>Status: {debugError}</div>
+            </div>
         </div>
     );
 }
