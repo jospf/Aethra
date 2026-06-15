@@ -8,6 +8,31 @@ import { useVolcanoes } from './hooks/useVolcanoes';
 import Sidebar from './components/ui/Sidebar';
 import Ticker from './components/ui/Ticker';
 
+const getLocalTimeData = () => {
+    const now = new Date();
+    const hrs = String(now.getHours()).padStart(2, '0');
+    const mins = String(now.getMinutes()).padStart(2, '0');
+    const secs = String(now.getSeconds()).padStart(2, '0');
+    
+    const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = months[now.getMonth()];
+    const day = String(now.getDate()).padStart(2, '0');
+    const year = now.getFullYear();
+    
+    const utcHrs = String(now.getUTCHours()).padStart(2, '0');
+    const utcMins = String(now.getUTCMinutes()).padStart(2, '0');
+    const utcSecs = String(now.getUTCSeconds()).padStart(2, '0');
+
+    return {
+        localTime: `${hrs}:${mins}:${secs}`,
+        localTimezone: tzName,
+        localDate: `${month} ${day} ${year}`,
+        utcTime: `${utcHrs}:${utcMins}:${utcSecs}`
+    };
+};
+
 function App() {
     const [mapStyle, setMapStyle] = useState('satellite');
     const [layers, setLayers] = useState({
@@ -32,6 +57,16 @@ function App() {
     });
     const [focusLocation, setFocusLocation] = useState(null);
     const [dayNightMode, setDayNightMode] = useState(false);
+    const [showTimezones, setShowTimezones] = useState(false);
+    const [timeData, setTimeData] = useState(() => getLocalTimeData());
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setTimeData(getLocalTimeData());
+        }, 1000);
+        return () => clearInterval(interval);
+    }, []);
+
     const { moonData } = useMoon();
     const { issData, issTrack } = useISS();
     const { earthquakeData } = useEarthquakes();
@@ -106,6 +141,7 @@ function App() {
                     volcanoData={volcanoData}
                     focusLocation={focusLocation}
                     dayNightMode={dayNightMode}
+                    showTimezones={showTimezones}
                 />
             </div>
 
@@ -127,6 +163,8 @@ function App() {
                 toggleTimezone={toggleTimezone}
                 dayNightMode={dayNightMode}
                 toggleDayNightMode={() => setDayNightMode(!dayNightMode)}
+                showTimezones={showTimezones}
+                toggleTimezones={() => setShowTimezones(!showTimezones)}
             />
 
             {/* Header Overlay */}
@@ -176,15 +214,29 @@ function App() {
                 </div>
 
                 {/* Clock Widgets */}
-                <div className="absolute left-1/2 -translate-x-1/2 pointer-events-auto">
-                    <ClockWidget settings={clockSettings} />
-                </div>
+                {!showTimezones && (
+                    <div className="absolute left-1/2 -translate-x-1/2 pointer-events-auto">
+                        <ClockWidget settings={clockSettings} />
+                    </div>
+                )}
             </header>
 
             {/* Footer Overlay */}
-            <footer className="absolute bottom-10 left-0 w-full z-10 p-4 flex justify-between items-end pointer-events-none">
-                <div className="text-[10px] text-white/30 tracking-wider font-light">
-                    © 2026 AETHRA COMMAND • GEOSPATIAL INTELLIGENCE
+            <footer className="absolute bottom-10 left-0 w-full z-10 pl-6 pr-16 py-2 flex justify-between items-end pointer-events-none select-none">
+                {/* Bottom Left: Local & UTC Clocks */}
+                <div className="flex flex-col gap-0.5 pointer-events-auto bg-slate-950/75 backdrop-blur-md px-3.5 py-2 rounded-lg border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
+                    <div className="text-xs font-mono font-bold text-cyan-400 tracking-wider flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse shadow-[0_0_6px_rgba(6,182,212,0.5)]" />
+                        {timeData.localTime} <span className="text-[9px] text-gray-500 uppercase tracking-widest font-sans font-medium">({timeData.localTimezone})</span>
+                    </div>
+                    <div className="text-[10px] font-mono font-bold text-gray-500 tracking-wider pl-3">
+                        {timeData.utcTime} <span className="text-[8px] text-gray-600 uppercase tracking-widest font-sans font-medium font-bold">UTC</span>
+                    </div>
+                </div>
+
+                {/* Bottom Right: Date */}
+                <div className="pointer-events-auto bg-slate-950/75 backdrop-blur-md px-3.5 py-2 rounded-lg border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.1)] text-xs font-mono font-bold text-cyan-400 tracking-widest uppercase">
+                    {timeData.localDate}
                 </div>
             </footer>
 

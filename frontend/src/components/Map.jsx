@@ -10,6 +10,52 @@ import { useShips } from '../hooks/useShips';
 import dateLineGeoJson from '../data/dateLine.json';
 import cablesGeoJson from '../data/cables.json';
 
+const MILITARY_TZ_NAMES = {
+    'Z': 'Zulu',
+    'A': 'Alpha',
+    'B': 'Bravo',
+    'C': 'Charlie',
+    'D': 'Delta',
+    'E': 'Echo',
+    'F': 'Foxtrot',
+    'G': 'Golf',
+    'H': 'Hotel',
+    'I': 'India',
+    'K': 'Kilo',
+    'L': 'Lima',
+    'M': 'Mike',
+    'N': 'November',
+    'O': 'Oscar',
+    'P': 'Papa',
+    'Q': 'Quebec',
+    'R': 'Romeo',
+    'S': 'Sierra',
+    'T': 'Tango',
+    'U': 'Uniform',
+    'V': 'Victor',
+    'W': 'Whiskey',
+    'X': 'X-ray',
+    'Y': 'Yankee'
+};
+
+const getMilitaryTzInfo = (offsetHours) => {
+    let letter = '';
+    if (offsetHours === 0) {
+        letter = 'Z';
+    } else if (offsetHours > 0) {
+        const code = offsetHours <= 9 ? 64 + offsetHours : 65 + offsetHours;
+        letter = String.fromCharCode(code);
+    } else {
+        const code = 77 - offsetHours;
+        letter = String.fromCharCode(code);
+    }
+    
+    return {
+        letter,
+        name: MILITARY_TZ_NAMES[letter] || ''
+    };
+};
+
 export default function Map({
     mapStyle = 'satellite',
     layers = { night: true, moon: true, iss: true },
@@ -21,7 +67,8 @@ export default function Map({
     earthquakeData,
     volcanoData,
     focusLocation,
-    dayNightMode = false
+    dayNightMode = false,
+    showTimezones = false
 }) {
     const { nightPolygon, dayPolygon } = useTerminator();
     const { radarPath } = useWeather();
@@ -726,6 +773,29 @@ export default function Map({
             });
         }
 
+        // Timezone boundaries
+        if (!map.getSource('timezone-boundaries')) {
+            map.addSource('timezone-boundaries', {
+                type: 'geojson',
+                data: '/assets/timezones.json'
+            });
+        }
+        if (!map.getLayer('timezone-boundaries-layer')) {
+            map.addLayer({
+                id: 'timezone-boundaries-layer',
+                type: 'line',
+                source: 'timezone-boundaries',
+                paint: {
+                    'line-color': '#06b6d4',
+                    'line-width': 1.2,
+                    'line-opacity': 0.35
+                },
+                layout: {
+                    'visibility': 'none'
+                }
+            });
+        }
+
         // Moon
         if (!map.getSource('moon')) {
             map.addSource('moon', {
@@ -1156,8 +1226,9 @@ export default function Map({
         setLayerVisibility('ships-layer', weatherLayers.ships);
         setLayerVisibility('cables-layer', weatherLayers.cables);
         setLayerVisibility('date-line-layer', showDateLine);
+        setLayerVisibility('timezone-boundaries-layer', showTimezones);
 
-    }, [layers, mapStyle, dayNightMode, isBottomMapLoaded, isTopMapLoaded, weatherLayers, showDateLine]);
+    }, [layers, mapStyle, dayNightMode, isBottomMapLoaded, isTopMapLoaded, weatherLayers, showDateLine, showTimezones]);
 
     // Force update clip-path when mode or terminator changes
     useEffect(() => {
@@ -1167,6 +1238,95 @@ export default function Map({
         }
         updateClipPath();
     }, [dayNightMode, nightPolygon, isBottomMapLoaded, isTopMapLoaded]);
+
+    const [visibleClocks, setVisibleClocks] = useState([]);
+    const updateClocksRef = useRef(null);
+
+    const updateClocks = () => {
+        if (!mapBottom.current || !showTimezones) {
+            setVisibleClocks([]);
+            return;
+        }
+
+        try {
+            const bounds = mapBottom.current.getBounds();
+            const west = bounds.getWest();
+            const east = bounds.getEast();
+            const mapCenter = mapBottom.current.getCenter();
+            
+            const minN = Math.ceil(west / 15);
+            const maxN = Math.floor(east / 15);
+            
+            const clocks = [];
+            const now = new Date();
+            const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+
+            for (let n = minN; n <= maxN; n++) {
+                const lng = 15 * n;
+                const projected = mapBottom.current.project([lng, mapCenter.lat]);
+                
+                if (projected && projected.x >= 0 && projected.x <= window.innerWidth) {
+                    // Calculate wrapped offset
+                    let offsetHours = n;
+                    offsetHours = ((offsetHours + 12) % 24 + 24) % 24 - 12;
+                    
+                    // Format time (hours only)
+                    const tzTime = new Date(utcTime + (offsetHours * 3600000));
+                    const hrs = String(tzTime.getHours()).padStart(2, '0');
+                    
+                    const { letter } = getMilitaryTzInfo(offsetHours);
+                    
+                    clocks.push({
+                        id: `tz-${n}`,
+                        x: projected.x,
+                        time: hrs,
+                        letter
+                    });
+                }
+            }
+            
+            setVisibleClocks(clocks);
+        } catch (err) {
+            console.error('Error updating timezone clocks:', err);
+        }
+    };
+
+    updateClocksRef.current = updateClocks;
+
+    // Update timezone clocks on map interaction and time passage
+    useEffect(() => {
+        if (!isBottomMapLoaded || !showTimezones) {
+            setVisibleClocks([]);
+            return;
+        }
+
+        const handleUpdate = () => {
+            if (updateClocksRef.current) {
+                updateClocksRef.current();
+            }
+        };
+
+        handleUpdate();
+
+        const map = mapBottom.current;
+        if (map) {
+            map.on('move', handleUpdate);
+            map.on('zoom', handleUpdate);
+            map.on('render', handleUpdate);
+        }
+
+        // Ticking interval
+        const interval = setInterval(handleUpdate, 1000);
+
+        return () => {
+            if (map) {
+                map.off('move', handleUpdate);
+                map.off('zoom', handleUpdate);
+                map.off('render', handleUpdate);
+            }
+            clearInterval(interval);
+        };
+    }, [showTimezones, isBottomMapLoaded]);
 
     return (
         <div className="map-wrap absolute inset-0 w-full h-full bg-[#0b0e14]">
@@ -1178,6 +1338,31 @@ export default function Map({
                 ref={mapTopContainer} 
                 className="map w-full h-full absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-300 top-map-container"
             />
+
+            {/* Timezone Floating Clocks */}
+            {showTimezones && (
+                <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
+                    {visibleClocks.map(clock => (
+                        <div
+                            key={clock.id}
+                            style={{
+                                position: 'absolute',
+                                left: `${clock.x}px`,
+                                top: '80px',
+                                transform: 'translateX(-50%)',
+                            }}
+                            className="bg-slate-950/85 backdrop-blur-md px-2 py-1 rounded border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)] flex flex-col items-center gap-0.25 min-w-[36px]"
+                        >
+                            <span className="text-[12px] font-mono font-bold text-white tracking-widest drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]">
+                                {clock.time}
+                            </span>
+                            <span className="text-[9px] font-mono font-bold text-cyan-400 uppercase tracking-widest">
+                                {clock.letter}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
