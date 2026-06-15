@@ -14,20 +14,24 @@ Aethra is designed to be lightweight, extensible, and easy to deploy on low-powe
 - **Day/Night Mode**: Differential map rendering showing satellite imagery in daylit regions and city lights in nighttime regions.
 - **City Lights Layer**: NASA Black Marble composite showing Earth's nocturnal illumination from space.
 - **Clock Widgets**: Customizable world clocks with glassmorphism design, supporting multiple timezones (Local, UTC, etc.).
+- **Timezone Grid & Floating Clocks**:
+  - High-fidelity political timezone boundaries overlay.
+  - Dynamic floating clocks at the top of each timezone showing the current hour and military timezone letter (e.g., `Z`, `A`, `R`).
+  - Corner HUD overlays: 50% larger local clock (with IANA name), UTC clock, and 3-letter month date.
+  - Geographically-locked day-of-the-week indicators on either side of the International Date Line (`◀ Sunday` / `Saturday ▶`) positioned near Australia.
 - **Stardate Calculation**: Integrated Stardate display for a futuristic touch.
-- **Celestial Tracking**: Visual tracking of the Sun, Moon, and ISS (International Space Station).
+- **ISS Tracker & Orbit Path**:
+  - Live visual tracking of the International Space Station.
+  - Cyberpunk neon orange orbit track line with independent visibility controls in the sidebar.
+- **Space Weather Ticker**: Real-time solar wind, geomagnetic storms, and radio blackout feeds from NOAA SWPC displayed in a scrolling ticker.
 - **Weather Visualization**: Real-time global precipitation radar and Aurora Forecast heatmaps.
 - **Geological Events**:
   - **Earthquakes**: Live M2.5+ earthquake tracking with pulsing animation for recent events (last 24 hours).
   - **Volcanoes**: Live volcanic activity feed from Smithsonian GVP with color-coded alert levels (red=erupting, orange=active, gray=monitored).
-- **Global Traffic**:
-  - ~~**Flight Traffic**~~: *(Temporarily disabled - OpenSky rate limiting)*
-  - **Maritime Traffic**: Live ship positions via AisStream.io WebSocket integration (requires free API key).
-- **Infrastructure**:
+- **Global Traffic & Infrastructure**:
+  - **Maritime Traffic**: Live ship positions via AisStream.io WebSocket integration.
   - **Submarine Cables**: Visualization of the global fiber optic network connecting continents.
-- ~~**Satellites (Orbital Traffic)**~~: *(Temporarily disabled - network connectivity issues)*
-  - ~~**GPS Constellation**~~
-  - ~~**Iridium Constellation**~~
+  - ~~**Flight Traffic**~~: *(Temporarily disabled - OpenSky rate limiting)*
 - **Map Customization**: Multiple base map styles (Satellite, Dark, Light, Grey).
 
 ![Clock Interface Demo](assets/clock-interface-demo.png)
