@@ -1328,6 +1328,84 @@ export default function Map({
         };
     }, [showTimezones, isBottomMapLoaded]);
 
+    const [idlDays, setIdlDays] = useState(null);
+    const updateIdlDaysRef = useRef(null);
+
+    const updateIdlDays = () => {
+        if (!mapBottom.current || !showDateLine || !isBottomMapLoaded) {
+            setIdlDays(null);
+            return;
+        }
+
+        try {
+            const centerLng = mapBottom.current.getCenter().lng;
+            const N = Math.round((centerLng - 180) / 360);
+            const idlLng = 180 + N * 360;
+            
+            const mapCenter = mapBottom.current.getCenter();
+            const idlProjected = mapBottom.current.project([idlLng, mapCenter.lat]);
+            
+            if (idlProjected && idlProjected.x >= -100 && idlProjected.x <= window.innerWidth + 100) {
+                const now = new Date();
+                const nowMs = now.getTime();
+                
+                // Left side is UTC+12 (ahead)
+                const leftDate = new Date(nowMs + 12 * 3600000);
+                // Right side is UTC-12 (behind)
+                const rightDate = new Date(nowMs - 12 * 3600000);
+                
+                const leftDay = leftDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
+                const rightDay = rightDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
+                
+                setIdlDays({
+                    x: idlProjected.x,
+                    y: idlProjected.y,
+                    leftDay,
+                    rightDay
+                });
+            } else {
+                setIdlDays(null);
+            }
+        } catch (err) {
+            console.error('Error updating IDL days:', err);
+        }
+    };
+
+    updateIdlDaysRef.current = updateIdlDays;
+
+    useEffect(() => {
+        if (!isBottomMapLoaded || !showDateLine) {
+            setIdlDays(null);
+            return;
+        }
+
+        const handleUpdate = () => {
+            if (updateIdlDaysRef.current) {
+                updateIdlDaysRef.current();
+            }
+        };
+
+        handleUpdate();
+
+        const map = mapBottom.current;
+        if (map) {
+            map.on('move', handleUpdate);
+            map.on('zoom', handleUpdate);
+            map.on('render', handleUpdate);
+        }
+
+        const interval = setInterval(handleUpdate, 1000);
+
+        return () => {
+            if (map) {
+                map.off('move', handleUpdate);
+                map.off('zoom', handleUpdate);
+                map.off('render', handleUpdate);
+            }
+            clearInterval(interval);
+        };
+    }, [showDateLine, isBottomMapLoaded]);
+
     return (
         <div className="map-wrap absolute inset-0 w-full h-full bg-[#0b0e14]">
             {/* Bottom Map */}
@@ -1361,6 +1439,39 @@ export default function Map({
                             </span>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* IDL Day Indicators */}
+            {showDateLine && idlDays && (
+                <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
+                    {/* Left Box (West of IDL - Tomorrow) */}
+                    <div
+                        style={{
+                            position: 'absolute',
+                            left: `${idlDays.x - 12}px`,
+                            top: `${idlDays.y}px`,
+                            transform: 'translate(-100%, -50%)',
+                        }}
+                        className="bg-slate-950/85 backdrop-blur-md px-5 py-3 rounded-xl border border-cyan-500/20 shadow-[0_0_20px_rgba(6,182,212,0.12)] text-[18px] font-mono font-bold text-cyan-400 tracking-wider flex items-center gap-2 select-none"
+                    >
+                        <span>◀</span>
+                        <span>{idlDays.leftDay}</span>
+                    </div>
+
+                    {/* Right Box (East of IDL - Today) */}
+                    <div
+                        style={{
+                            position: 'absolute',
+                            left: `${idlDays.x + 12}px`,
+                            top: `${idlDays.y}px`,
+                            transform: 'translate(0, -50%)',
+                        }}
+                        className="bg-slate-950/85 backdrop-blur-md px-5 py-3 rounded-xl border border-cyan-500/20 shadow-[0_0_20px_rgba(6,182,212,0.12)] text-[18px] font-mono font-bold text-cyan-400 tracking-wider flex items-center gap-2 select-none"
+                    >
+                        <span>{idlDays.rightDay}</span>
+                        <span>▶</span>
+                    </div>
                 </div>
             )}
         </div>
