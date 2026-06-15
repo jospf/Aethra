@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
+import { useSpaceWeather } from '../../hooks/useSpaceWeather';
 
 export default function Ticker({ earthquakeData, volcanoData, moonData, issData }) {
+    const spaceWeather = useSpaceWeather();
     const tickerItems = useMemo(() => {
         const items = [];
 
@@ -52,6 +54,27 @@ export default function Ticker({ earthquakeData, volcanoData, moonData, issData 
             );
         }
 
+        // 4. Space Weather Data
+        if (spaceWeather && !spaceWeather.loading) {
+            items.push(
+                <span key="solar-wind" className="text-yellow-400 font-semibold mx-8">
+                    ☀️ SOLAR WIND: {spaceWeather.solarWindSpeed} km/s
+                </span>
+            );
+            items.push(
+                <span key="kp-index" className={`font-semibold mx-8 ${spaceWeather.kpIndex >= 4.0 ? 'text-red-400 animate-pulse' : 'text-green-400'}`}>
+                    🧲 GEOMAGNETIC SCALE: Kp-{spaceWeather.kpIndex.toFixed(2)} ({spaceWeather.geomagneticStormLevel})
+                </span>
+            );
+            if (spaceWeather.solarFlare) {
+                items.push(
+                    <span key="solar-flare" className="text-orange-400 font-semibold mx-8">
+                        💥 SOLAR FLARE: Class {spaceWeather.solarFlare}
+                    </span>
+                );
+            }
+        }
+
         // Add a general system status if no major events
         if (items.length <= 2) { // just moon and iss
            items.push(
@@ -73,7 +96,7 @@ export default function Ticker({ earthquakeData, volcanoData, moonData, issData 
         }
 
         return duplicatedItems;
-    }, [earthquakeData, volcanoData, moonData, issData]);
+    }, [earthquakeData, volcanoData, moonData, issData, spaceWeather]);
 
     return (
         <div className="absolute bottom-0 left-0 w-full h-8 bg-slate-900/80 backdrop-blur-md border-t border-white/10 z-20 overflow-hidden flex items-center pointer-events-auto">
