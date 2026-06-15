@@ -7,7 +7,7 @@ export function useMoon() {
 
     const fetchMoonData = async () => {
         try {
-            const response = await fetch('/api/moon');
+            const response = await fetch(`/api/moon?t=${Date.now()}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch moon data');
             }

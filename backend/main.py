@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from skyfield.api import load, wgs84, EarthSatellite
 from skyfield import almanac
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import json
 import os
 import requests
@@ -93,6 +93,79 @@ def get_iss_position():
         "latitude": subpoint.latitude.degrees,
         "longitude": subpoint.longitude.degrees
     }
+
+@app.get("/api/iss/track")
+def get_iss_track():
+    """
+    Calculate ISS orbital track coordinates for one full orbital period
+    Returns a GeoJSON Feature with a MultiLineString geometry
+    """
+    try:
+        stations_url = 'http://celestrak.org/NORAD/elements/stations.txt'
+        satellites = load.tle_file(stations_url)
+        by_name = {sat.name: sat for sat in satellites}
+        iss = by_name['ISS (ZARYA)']
+        
+        now = datetime.utcnow().replace(tzinfo=timezone.utc)
+        coordinates = []
+        
+        # Calculate positions from -45 to +48 minutes (covering a full 93-minute orbit)
+        for offset_min in range(-45, 48):
+            t_dt = now + timedelta(minutes=offset_min)
+            t = ts.from_datetime(t_dt)
+            
+            geocentric = iss.at(t)
+            subpoint = wgs84.subpoint(geocentric)
+            
+            lon = subpoint.longitude.degrees
+            lat = subpoint.latitude.degrees
+            
+            if lon is not None and lat is not None:
+                coordinates.append((lon, lat))
+            
+        # Split coordinates into segments when crossing the antimeridian
+        segments = []
+        current_segment = []
+        
+        for coord in coordinates:
+            if not current_segment:
+                current_segment.append(coord)
+            else:
+                prev_lon = current_segment[-1][0]
+                curr_lon = coord[0]
+                
+                # Split segment if longitude jump > 180 degrees
+                if abs(curr_lon - prev_lon) > 180:
+                    segments.append(current_segment)
+                    current_segment = [coord]
+                else:
+                    current_segment.append(coord)
+                    
+        if current_segment:
+            segments.append(current_segment)
+            
+        return {
+            "type": "Feature",
+            "geometry": {
+                "type": "MultiLineString",
+                "coordinates": segments
+            },
+            "properties": {
+                "name": "ISS Orbit Track"
+            }
+        }
+    except Exception as e:
+        print(f"Error generating ISS track: {e}")
+        return {
+            "type": "Feature",
+            "geometry": {
+                "type": "MultiLineString",
+                "coordinates": []
+            },
+            "properties": {
+                "error": str(e)
+            }
+        }
 
 @app.get("/api/satellites/{group}")
 def get_satellites(group: str):

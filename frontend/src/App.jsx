@@ -33,7 +33,7 @@ function App() {
     const [focusLocation, setFocusLocation] = useState(null);
     const [dayNightMode, setDayNightMode] = useState(false);
     const { moonData } = useMoon();
-    const issData = useISS();
+    const { issData, issTrack } = useISS();
     const { earthquakeData } = useEarthquakes();
     const { volcanoData } = useVolcanoes();
 
@@ -101,6 +101,7 @@ function App() {
                     weatherLayers={weatherLayers}
                     moonData={moonData}
                     issData={issData}
+                    issTrack={issTrack}
                     earthquakeData={earthquakeData}
                     volcanoData={volcanoData}
                     focusLocation={focusLocation}

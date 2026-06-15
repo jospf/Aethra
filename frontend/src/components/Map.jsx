@@ -17,6 +17,7 @@ export default function Map({
     weatherLayers = { precipitation: false, clouds: false, temperature: false },
     moonData,
     issData,
+    issTrack,
     earthquakeData,
     volcanoData,
     focusLocation,
@@ -24,6 +25,12 @@ export default function Map({
 }) {
     const mapContainer = useRef(null);
     const map = useRef(null);
+    const layersRef = useRef(layers);
+
+    useEffect(() => {
+        layersRef.current = layers;
+    }, [layers]);
+
     const [lng] = useState(0);
     const [lat] = useState(0);
     const [zoom] = useState(1.5); // Start zoomed out for global view
@@ -597,6 +604,8 @@ export default function Map({
                     "moon-full-moon", "moon-waning-gibbous", "moon-last-quarter", "moon-waning-crescent"
                 ];
 
+                let timeoutId;
+
                 const loadPromises = phases.map(phase => {
                     return new Promise((resolve) => {
                         if (map.current.hasImage(phase)) {
@@ -606,12 +615,22 @@ export default function Map({
                         }
 
                         const img = new Image();
-                        const url = `/assets/moon_phases/${phase}.png`;
+                        const url = `/assets/moon_phases/${phase}.png?v=2`;
 
                         img.onload = () => {
                             if (!map.current.hasImage(phase)) {
-                                map.current.addImage(phase, img);
-                                console.log(`Successfully added image: ${phase}`);
+                                try {
+                                    const canvas = document.createElement('canvas');
+                                    canvas.width = img.naturalWidth || img.width || 128;
+                                    canvas.height = img.naturalHeight || img.height || 128;
+                                    const ctx = canvas.getContext('2d');
+                                    ctx.drawImage(img, 0, 0);
+                                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                                    map.current.addImage(phase, imageData);
+                                    console.log(`Successfully added image: ${phase} via canvas`);
+                                } catch (e) {
+                                    console.error(`Error adding image ${phase} via canvas:`, e);
+                                }
                             }
                             resolve();
                         };
@@ -621,18 +640,20 @@ export default function Map({
                             resolve(); // Resolve anyway to not block
                         };
 
-                        img.crossOrigin = "Anonymous";
                         img.src = url;
                     });
                 });
 
                 // Force resolution if it takes too long (safety net)
-                const timeoutPromise = new Promise(resolve => setTimeout(() => {
-                    console.warn("Image loading timed out (native), proceeding to render layer.");
-                    resolve();
-                }, 3000));
+                const timeoutPromise = new Promise(resolve => {
+                    timeoutId = setTimeout(() => {
+                        console.warn("Image loading timed out (native), proceeding to render layer.");
+                        resolve();
+                    }, 3000);
+                });
 
                 await Promise.race([Promise.all(loadPromises), timeoutPromise]);
+                if (timeoutId) clearTimeout(timeoutId);
 
                 console.log("All images loaded (or timed out). Adding moon-layer.");
 
@@ -644,15 +665,15 @@ export default function Map({
                             type: 'symbol',
                             source: 'moon',
                             layout: {
-                                'icon-image': ['get', 'icon'],
+                                'icon-image': moonData ? moonData.phase_name : 'moon-new-moon',
                                 'icon-size': 0.6,
                                 'icon-allow-overlap': true,
                                 'icon-anchor': 'center',
                                 'icon-offset': [0, 0],
-                                'visibility': layers.moon ? 'visible' : 'none'
+                                'visibility': layersRef.current.moon ? 'visible' : 'none'
                             }
                         });
-                        console.log("moon-layer added successfully.");
+                        console.log("moon-layer added successfully with visibility:", layersRef.current.moon ? 'visible' : 'none');
                     } catch (err) {
                         console.error("Error adding moon-layer:", err);
                     }
@@ -667,33 +688,70 @@ export default function Map({
                 data: { type: 'FeatureCollection', features: [] }
             });
 
+            // 4.1 ISS TRACK LAYER
+            map.current.addSource('iss-track', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+
+            map.current.addLayer({
+                id: 'iss-track-layer',
+                type: 'line',
+                source: 'iss-track',
+                paint: {
+                    'line-color': '#06b6d4', // Cyan-500 matching the ISS theme
+                    'line-width': 2,
+                    'line-opacity': 0.5,
+                    'line-dasharray': [4, 4] // Beautiful dashed orbital path
+                },
+                layout: {
+                    'visibility': layersRef.current.iss ? 'visible' : 'none'
+                }
+            });
+
             loadMoonImages();
 
             // Load ISS Image (Native API)
             const loadISSImage = () => {
                 const img = new Image();
-                const url = '/assets/iss.png';
+                const url = '/assets/iss.png?v=2';
                 img.onload = () => {
+                    console.log("ISS image loaded successfully.");
                     if (!map.current.hasImage('iss-icon')) {
-                        map.current.addImage('iss-icon', img);
+                        try {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = img.naturalWidth || img.width || 32;
+                            canvas.height = img.naturalHeight || img.height || 32;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0);
+                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                            map.current.addImage('iss-icon', imageData);
+                            console.log("Successfully added iss-icon via canvas");
+                        } catch (e) {
+                            console.error("Error adding iss-icon via canvas:", e);
+                        }
                     }
                     // Add ISS Layer once image is ready
                     if (!map.current.getLayer('iss-layer')) {
-                        map.current.addLayer({
-                            id: 'iss-layer',
-                            type: 'symbol',
-                            source: 'iss',
-                            layout: {
-                                'icon-image': 'iss-icon',
-                                'icon-size': 0.6,
-                                'icon-allow-overlap': true,
-                                'visibility': layers.iss ? 'visible' : 'none'
-                            }
-                        });
+                        try {
+                            map.current.addLayer({
+                                id: 'iss-layer',
+                                type: 'symbol',
+                                source: 'iss',
+                                layout: {
+                                    'icon-image': 'iss-icon',
+                                    'icon-size': 0.6,
+                                    'icon-allow-overlap': true,
+                                    'visibility': layersRef.current.iss ? 'visible' : 'none'
+                                }
+                            });
+                            console.log("iss-layer added successfully with visibility:", layersRef.current.iss ? 'visible' : 'none');
+                        } catch (err) {
+                            console.error("Error adding iss-layer:", err);
+                        }
                     }
                 };
                 img.onerror = (err) => console.error("Error loading ISS image", err);
-                img.crossOrigin = "Anonymous";
                 img.src = url;
             };
             loadISSImage();
@@ -752,6 +810,7 @@ export default function Map({
     // Update Moon Data
     useEffect(() => {
         if (map.current && moonData && map.current.getSource('moon')) {
+            console.log("Setting moon data on source. Coordinates:", [moonData.longitude, moonData.latitude], "Phase:", moonData.phase_name);
             map.current.getSource('moon').setData({
                 type: 'FeatureCollection',
                 features: [{
@@ -760,11 +819,17 @@ export default function Map({
                         type: 'Point',
                         coordinates: [moonData.longitude, moonData.latitude]
                     },
-                    properties: {
-                        icon: moonData.phase_name
-                    }
+                    properties: {}
                 }]
             });
+            
+            // Set the icon-image layout property directly to avoid MapLibre data-driven binding issues
+            if (map.current.getLayer('moon-layer')) {
+                map.current.setLayoutProperty('moon-layer', 'icon-image', moonData.phase_name);
+                console.log("Set moon-layer icon-image to:", moonData.phase_name);
+            }
+        } else {
+            console.log("Skipping moon data set. map.current:", !!map.current, "moonData:", !!moonData, "source:", map.current ? !!map.current.getSource('moon') : false);
         }
     }, [moonData, isMapLoaded]);
 
@@ -802,6 +867,7 @@ export default function Map({
     // Update ISS Data
     useEffect(() => {
         if (map.current && issData && map.current.getSource('iss')) {
+            console.log("Setting ISS data on source. Coordinates:", [issData.longitude, issData.latitude]);
             map.current.getSource('iss').setData({
                 type: 'FeatureCollection',
                 features: [{
@@ -813,8 +879,18 @@ export default function Map({
                     properties: {}
                 }]
             });
+        } else {
+            console.log("Skipping ISS data set. map.current:", !!map.current, "issData:", !!issData, "source:", map.current ? !!map.current.getSource('iss') : false);
         }
     }, [issData, isMapLoaded]);
+
+    // Update ISS Track Data
+    useEffect(() => {
+        if (map.current && issTrack && map.current.getSource('iss-track')) {
+            console.log("Setting ISS track data on source.");
+            map.current.getSource('iss-track').setData(issTrack);
+        }
+    }, [issTrack, isMapLoaded]);
 
     // Update Aurora Data
     useEffect(() => {
@@ -894,6 +970,9 @@ export default function Map({
         setVisibility('moon-layer', layers.moon);
         setVisibility('moon-glow', layers.moon);
         setVisibility('iss-layer', layers.iss);
+        if (map.current.getLayer('iss-track-layer')) {
+            setVisibility('iss-track-layer', layers.iss);
+        }
 
         if (map.current.getLayer('gps-layer')) {
             setVisibility('gps-layer', weatherLayers.gps);
