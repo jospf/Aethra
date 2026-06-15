@@ -23,6 +23,14 @@ export default function Map({
     focusLocation,
     dayNightMode = false
 }) {
+    const { nightPolygon, dayPolygon } = useTerminator();
+    const { radarPath } = useWeather();
+    const { auroraData } = useAurora();
+    // const { flightData } = useFlights(); // Temporarily disabled - OpenSky rate limiting
+    const { shipData } = useShips();
+    // const { data: gpsData } = useSatellites('gps'); // Temporarily disabled - network issues
+    // const { data: iridiumData } = useSatellites('iridium'); // Temporarily disabled - network issues
+
     const mapBottomContainer = useRef(null);
     const mapTopContainer = useRef(null);
     const mapBottom = useRef(null);
@@ -50,14 +58,6 @@ export default function Map({
     const [isBottomMapLoaded, setIsBottomMapLoaded] = useState(false);
     const [isTopMapLoaded, setIsTopMapLoaded] = useState(false);
     const [debugError, setDebugError] = useState('None');
-
-    const { nightPolygon, dayPolygon } = useTerminator();
-    const { radarPath } = useWeather();
-    const { auroraData } = useAurora();
-    // const { flightData } = useFlights(); // Temporarily disabled - OpenSky rate limiting
-    const { shipData } = useShips();
-    // const { data: gpsData } = useSatellites('gps'); // Temporarily disabled - network issues
-    // const { data: iridiumData } = useSatellites('iridium'); // Temporarily disabled - network issues
 
     // Helper functions to safely update layers/sources on both maps
     const setSourceData = (sourceId, data) => {
