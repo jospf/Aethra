@@ -1351,12 +1351,12 @@ export default function Map({
                                 top: '80px',
                                 transform: 'translateX(-50%)',
                             }}
-                            className="bg-slate-950/85 backdrop-blur-md px-2 py-1 rounded border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)] flex flex-col items-center gap-0.25 min-w-[36px]"
+                            className="bg-slate-950/85 backdrop-blur-md px-3 py-1.5 rounded-md border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)] flex flex-col items-center gap-0.5 min-w-[54px]"
                         >
-                            <span className="text-[12px] font-mono font-bold text-white tracking-widest drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]">
+                            <span className="text-[18px] font-mono font-bold text-white tracking-widest drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]">
                                 {clock.time}
                             </span>
-                            <span className="text-[9px] font-mono font-bold text-cyan-400 uppercase tracking-widest">
+                            <span className="text-[13px] font-mono font-bold text-cyan-400 uppercase tracking-widest">
                                 {clock.letter}
                             </span>
                         </div>

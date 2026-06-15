@@ -222,20 +222,20 @@ function App() {
             </header>
 
             {/* Footer Overlay */}
-            <footer className="absolute bottom-10 left-0 w-full z-10 pl-6 pr-16 py-2 flex justify-between items-end pointer-events-none select-none">
+            <footer className="absolute bottom-10 left-0 w-full z-10 pl-6 pr-20 py-2 flex justify-between items-end pointer-events-none select-none">
                 {/* Bottom Left: Local & UTC Clocks */}
-                <div className="flex flex-col gap-0.5 pointer-events-auto bg-slate-950/75 backdrop-blur-md px-3.5 py-2 rounded-lg border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
-                    <div className="text-xs font-mono font-bold text-cyan-400 tracking-wider flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse shadow-[0_0_6px_rgba(6,182,212,0.5)]" />
-                        {timeData.localTime} <span className="text-[9px] text-gray-500 uppercase tracking-widest font-sans font-medium">({timeData.localTimezone})</span>
+                <div className="flex flex-col gap-1 pointer-events-auto bg-slate-950/75 backdrop-blur-md px-5 py-3 rounded-xl border border-cyan-500/20 shadow-[0_0_20px_rgba(6,182,212,0.12)]">
+                    <div className="text-[18px] font-mono font-bold text-cyan-400 tracking-wider flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
+                        {timeData.localTime} <span className="text-[13px] text-gray-500 uppercase tracking-widest font-sans font-medium">({timeData.localTimezone})</span>
                     </div>
-                    <div className="text-[10px] font-mono font-bold text-gray-500 tracking-wider pl-3">
-                        {timeData.utcTime} <span className="text-[8px] text-gray-600 uppercase tracking-widest font-sans font-medium font-bold">UTC</span>
+                    <div className="text-[15px] font-mono font-bold text-gray-500 tracking-wider pl-5">
+                        {timeData.utcTime} <span className="text-[12px] text-gray-600 uppercase tracking-widest font-sans font-medium font-bold">UTC</span>
                     </div>
                 </div>
 
                 {/* Bottom Right: Date */}
-                <div className="pointer-events-auto bg-slate-950/75 backdrop-blur-md px-3.5 py-2 rounded-lg border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.1)] text-xs font-mono font-bold text-cyan-400 tracking-widest uppercase">
+                <div className="pointer-events-auto bg-slate-950/75 backdrop-blur-md px-5 py-3 rounded-xl border border-cyan-500/20 shadow-[0_0_20px_rgba(6,182,212,0.12)] text-[18px] font-mono font-bold text-cyan-400 tracking-widest uppercase">
                     {timeData.localDate}
                 </div>
             </footer>
