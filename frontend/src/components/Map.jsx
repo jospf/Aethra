@@ -58,7 +58,7 @@ const getMilitaryTzInfo = (offsetHours) => {
 
 export default function Map({
     mapStyle = 'satellite',
-    layers = { night: true, moon: true, iss: true },
+    layers = { night: true, moon: true, iss: true, issTrack: true },
     showDateLine = true,
     weatherLayers = { precipitation: false, clouds: false, temperature: false },
     moonData,
@@ -839,13 +839,13 @@ export default function Map({
                 type: 'line',
                 source: 'iss-track',
                 paint: {
-                    'line-color': '#06b6d4',
-                    'line-width': 2,
-                    'line-opacity': 0.5,
+                    'line-color': '#ff7a00',
+                    'line-width': 2.5,
+                    'line-opacity': 0.75,
                     'line-dasharray': [4, 4]
                 },
                 layout: {
-                    'visibility': layersRef.current.iss ? 'visible' : 'none'
+                    'visibility': layersRef.current.issTrack ? 'visible' : 'none'
                 }
             });
         }
@@ -1214,7 +1214,7 @@ export default function Map({
         setLayerVisibility('moon-layer', layers.moon);
         setLayerVisibility('moon-glow', layers.moon);
         setLayerVisibility('iss-layer', layers.iss);
-        setLayerVisibility('iss-track-layer', layers.iss);
+        setLayerVisibility('iss-track-layer', layers.issTrack);
         setLayerVisibility('gps-layer', weatherLayers.gps);
         setLayerVisibility('iridium-layer', weatherLayers.iridium);
         setLayerVisibility('rain-layer', weatherLayers.precipitation);

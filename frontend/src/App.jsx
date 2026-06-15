@@ -39,6 +39,7 @@ function App() {
         night: true,
         moon: true,
         iss: false,
+        issTrack: false,
         cityLights: false
     });
     const [showDateLine, setShowDateLine] = useState(true);

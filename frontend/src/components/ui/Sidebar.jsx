@@ -147,18 +147,37 @@ export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, 
                                     )}
                                 </div>
                                 <button
-                                    onClick={() => toggleLayer('iss')}
+                                    onClick={() => {
+                                        toggleLayer('iss');
+                                        // Auto-enable track when turning on ISS tracker for a better user experience
+                                        if (!layers.iss && !layers.issTrack) {
+                                            toggleLayer('issTrack');
+                                        }
+                                    }}
                                     className={`w-12 h-6 rounded-full transition-colors relative ${layers.iss ? 'bg-cyan-500' : 'bg-gray-700'}`}
                                 >
                                     <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${layers.iss ? 'translate-x-6' : 'translate-x-0'}`} />
                                 </button>
                             </div>
 
+                            {/* Orbit Track Sub-Toggle */}
+                            {layers.iss && (
+                                <div className="flex items-center justify-between pl-4 mt-1">
+                                    <span className="text-xs text-gray-400 font-medium tracking-wide">Show Orbit Track</span>
+                                    <button
+                                        onClick={() => toggleLayer('issTrack')}
+                                        className={`w-10 h-5 rounded-full transition-colors relative ${layers.issTrack ? 'bg-orange-500' : 'bg-gray-700'}`}
+                                    >
+                                        <div className={`absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-white rounded-full transition-transform ${layers.issTrack ? 'translate-x-5' : 'translate-x-0'}`} />
+                                    </button>
+                                </div>
+                            )}
+
                             {/* Locate Button ISS */}
                             {layers.iss && issData && (
                                 <button
                                     onClick={() => onLocate && onLocate(issData.latitude, issData.longitude)}
-                                    className="text-xs flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors pl-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="text-xs flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors pl-1 mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                                         <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
