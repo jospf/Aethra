@@ -87,20 +87,42 @@ export default function Map({
 
     // Update clip-path for day/night mode
     const updateClipPath = () => {
-        if (!mapBottom.current || !mapTop.current || !mapTopContainer.current) return;
+        if (!mapBottom.current || !mapTop.current || !mapTopContainer.current) {
+            return;
+        }
 
-        if (!dayNightMode || !nightPolygon) {
+        if (!dayNightMode) {
             mapTopContainer.current.style.clipPath = 'none';
+            mapTopContainer.current.style.webkitClipPath = 'none';
+            return;
+        }
+
+        if (!nightPolygon) {
+            mapTopContainer.current.style.clipPath = 'none';
+            mapTopContainer.current.style.webkitClipPath = 'none';
             return;
         }
 
         try {
             const coords = nightPolygon.geometry.coordinates[0];
+            let hasNaN = false;
             const points = coords.map(coord => {
                 const projected = mapBottom.current.project(coord);
+                if (!projected || isNaN(projected.x) || isNaN(projected.y)) {
+                    hasNaN = true;
+                    return '';
+                }
                 return `${projected.x.toFixed(1)}px ${projected.y.toFixed(1)}px`;
             });
-            mapTopContainer.current.style.clipPath = `polygon(${points.join(', ')})`;
+
+            if (hasNaN) {
+                requestAnimationFrame(updateClipPath);
+                return;
+            }
+
+            const clipPathVal = `polygon(${points.join(', ')})`;
+            mapTopContainer.current.style.clipPath = clipPathVal;
+            mapTopContainer.current.style.webkitClipPath = clipPathVal;
         } catch (err) {
             console.error('Error updating clip-path:', err);
         }
@@ -1091,6 +1113,10 @@ export default function Map({
 
     // Force update clip-path when mode or terminator changes
     useEffect(() => {
+        if (mapTopContainer.current) {
+            mapTopContainer.current.style.pointerEvents = 'none';
+            mapTopContainer.current.style.opacity = dayNightMode ? '1' : '0';
+        }
         updateClipPath();
     }, [dayNightMode, nightPolygon, isBottomMapLoaded, isTopMapLoaded]);
 
@@ -1103,10 +1129,6 @@ export default function Map({
             <div 
                 ref={mapTopContainer} 
                 className="map w-full h-full absolute inset-0 transition-opacity duration-300"
-                style={{
-                    pointerEvents: 'none',
-                    opacity: dayNightMode ? 1 : 0
-                }}
             />
         </div>
     );
