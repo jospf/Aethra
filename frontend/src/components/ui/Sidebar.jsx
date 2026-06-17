@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AVAILABLE_TIMEZONES } from '../../utils/timezones';
 
-export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, showDateLine, toggleDateLine, weatherLayers, toggleWeatherLayer, moonData, issData, onLocate, clockSettings, toggleClockSetting, toggleTimezone, dayNightMode, toggleDayNightMode, showTimezones, toggleTimezones, showTicker, toggleTicker }) {
+export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, showDateLine, toggleDateLine, weatherLayers, toggleWeatherLayer, moonData, issData, onLocate, clockSettings, toggleClockSetting, toggleTimezone, dayNightMode, toggleDayNightMode, showTimezones, toggleTimezones, showTicker, toggleTicker, tvMode, toggleTvMode }) {
 
     const [isOpen, setIsOpen] = useState(false);
 
@@ -50,6 +50,22 @@ export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, 
                                 {style.label}
                             </button>
                         ))}
+                    </div>
+
+                    {/* TV / Remote Mode Toggle */}
+                    <div className="flex items-center justify-between mb-8 p-3 rounded-lg border border-cyan-500/20 bg-cyan-500/5">
+                        <div className="flex flex-col">
+                            <span className="text-cyan-300 font-semibold tracking-wide">TV / Remote Mode</span>
+                            <span className="text-[9px] text-gray-500 uppercase tracking-wider">
+                                Optimize for Smart TV browsers
+                            </span>
+                        </div>
+                        <button
+                            onClick={toggleTvMode}
+                            className={`w-12 h-6 rounded-full transition-colors relative ${tvMode ? 'bg-cyan-500' : 'bg-gray-700'}`}
+                        >
+                            <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${tvMode ? 'translate-x-6' : 'translate-x-0'}`} />
+                        </button>
                     </div>
 
                     <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-6">

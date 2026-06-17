@@ -32,3 +32,187 @@ body {
     pointer-events: none !important;
 }
 
+/* ==========================================================================
+   TV / REMOTE MODE OVERRIDES
+   ========================================================================== */
+
+/* Enhanced focus styles for D-pad navigation */
+.tv-mode button:focus,
+.tv-mode button:focus-visible,
+.tv-mode select:focus,
+.tv-mode [role="button"]:focus {
+    outline: none !important;
+    border-color: rgba(34, 211, 238, 0.8) !important; /* cyan-400 */
+    box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.9), 0 0 0 6px rgba(34, 211, 238, 0.8) !important;
+    transform: scale(1.05);
+    transition: all 0.2s ease-in-out;
+}
+
+/* Sidebar sizing and layout scaling in TV Mode */
+.tv-mode .fixed.right-0.w-64 {
+    width: 24rem !important; /* w-96 */
+}
+
+.tv-mode .fixed.right-0.w-12 {
+    width: 5rem !important; /* w-20 */
+}
+
+.tv-mode .fixed.right-0 .p-6 {
+    padding: 2rem 2.5rem !important;
+}
+
+.tv-mode .fixed.right-0 .gap-6 {
+    gap: 2rem !important;
+}
+
+/* Enlarged sidebar toggle button and icon */
+.tv-mode button.absolute.top-6.left-0 {
+    padding: 0.75rem !important;
+}
+
+.tv-mode button.absolute.top-6.left-0 svg {
+    width: 2rem !important;
+    height: 2rem !important;
+}
+
+/* Sidebar typography scale-up */
+.tv-mode .fixed.right-0 h2.text-xl {
+    font-size: 1.5rem !important; /* text-2xl */
+    margin-bottom: 1.5rem !important;
+}
+
+.tv-mode .fixed.right-0 span.text-gray-300,
+.tv-mode .fixed.right-0 span.text-cyan-300,
+.tv-mode .fixed.right-0 span.text-purple-300 {
+    font-size: 1.125rem !important; /* text-lg */
+}
+
+.tv-mode .fixed.right-0 span.text-\[9px\] {
+    font-size: 0.75rem !important; /* text-xs */
+}
+
+.tv-mode .fixed.right-0 button.text-xs {
+    font-size: 0.875rem !important; /* text-sm */
+    margin-top: 0.5rem !important;
+}
+
+.tv-mode .fixed.right-0 button.text-\[10px\] {
+    font-size: 0.875rem !important; /* text-sm */
+    padding: 0.5rem 0.25rem !important;
+}
+
+.tv-mode .fixed.right-0 span.text-sm {
+    font-size: 1rem !important; /* text-base */
+}
+
+/* Toggle Switches Scaling (Standard switches: w-12 h-6 -> w-16 h-8) */
+.tv-mode button.w-12.h-6 {
+    width: 4rem !important;
+    height: 2rem !important;
+}
+
+.tv-mode button.w-12.h-6 > .w-4.h-4 {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    top: 0.25rem !important;
+    left: 0.25rem !important;
+}
+
+.tv-mode button.w-12.h-6 > .translate-x-6 {
+    transform: translateX(2rem) !important;
+}
+
+/* Toggle Switches Scaling (Sub-toggles: w-10 h-5 -> w-14 h-7) */
+.tv-mode button.w-10.h-5 {
+    width: 3.5rem !important;
+    height: 1.75rem !important;
+}
+
+.tv-mode button.w-10.h-5 > .w-3.5.h-3.5 {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    top: 0.25rem !important;
+    left: 0.25rem !important;
+}
+
+.tv-mode button.w-10.h-5 > .translate-x-5 {
+    transform: translateX(1.75rem) !important;
+}
+
+/* Ticker typography and size scale-up */
+.tv-mode .animate-marquee {
+    font-size: 1rem !important; /* text-base */
+}
+
+.tv-mode .h-8 {
+    height: 2.75rem !important;
+}
+
+.tv-mode .py-1 {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
+/* Corner overlays scale-up for TV viewing distance */
+.tv-mode footer.absolute.bottom-10 {
+    padding-left: 2rem !important;
+    padding-right: 6rem !important;
+}
+
+.tv-mode footer.absolute.bottom-10 .px-5.py-3 {
+    padding: 1rem 1.5rem !important;
+    border-radius: 1rem !important;
+}
+
+.tv-mode footer.absolute.bottom-10 .text-\[18px\] {
+    font-size: 1.5rem !important; /* text-2xl */
+}
+
+.tv-mode footer.absolute.bottom-10 .text-\[15px\] {
+    font-size: 1.25rem !important; /* text-xl */
+}
+
+.tv-mode footer.absolute.bottom-10 .text-\[13px\] {
+    font-size: 1rem !important; /* text-base */
+}
+
+.tv-mode footer.absolute.bottom-10 .text-\[12px\] {
+    font-size: 0.875rem !important; /* text-sm */
+}
+
+.tv-mode footer.absolute.bottom-10 .w-2.5.h-2.5 {
+    width: 0.75rem !important;
+    height: 0.75rem !important;
+}
+
+.tv-mode footer.absolute.bottom-10 .pl-5 {
+    padding-left: 1.75rem !important;
+}
+
+/* Header overlay branding scale-up */
+.tv-mode header.absolute.top-0 {
+    padding: 2rem !important;
+}
+
+.tv-mode header.absolute.top-0 .px-4.py-2 {
+    padding: 0.75rem 1.25rem !important;
+    border-radius: 0.75rem !important;
+}
+
+.tv-mode header.absolute.top-0 img.h-5 {
+    height: 1.75rem !important;
+}
+
+.tv-mode header.absolute.top-0 .text-\[10px\] {
+    font-size: 0.875rem !important; /* text-sm */
+}
+
+.tv-mode header.absolute.top-0 .text-\[9px\] {
+    font-size: 0.75rem !important; /* text-xs */
+}
+
+.tv-mode header.absolute.top-0 .w-1.5.h-1.5 {
+    width: 0.5rem !important;
+    height: 0.5rem !important;
+}
+

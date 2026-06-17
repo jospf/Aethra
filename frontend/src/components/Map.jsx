@@ -68,7 +68,8 @@ export default function Map({
     volcanoData,
     focusLocation,
     dayNightMode = false,
-    showTimezones = false
+    showTimezones = false,
+    tvMode = false
 }) {
     const { nightPolygon, dayPolygon } = useTerminator();
     const { radarPath } = useWeather();
@@ -1408,6 +1409,38 @@ export default function Map({
         };
     }, [showDateLine, isBottomMapLoaded]);
 
+    // Map control pad handlers
+    const handleMapPan = (direction) => {
+        if (!mapBottom.current) return;
+        const panStep = 200; // pixels to pan
+        switch (direction) {
+            case 'up':
+                mapBottom.current.panBy([0, -panStep], { duration: 300 });
+                break;
+            case 'down':
+                mapBottom.current.panBy([0, panStep], { duration: 300 });
+                break;
+            case 'left':
+                mapBottom.current.panBy([-panStep, 0], { duration: 300 });
+                break;
+            case 'right':
+                mapBottom.current.panBy([panStep, 0], { duration: 300 });
+                break;
+            default:
+                break;
+        }
+    };
+
+    const handleMapZoom = (type) => {
+        if (!mapBottom.current) return;
+        const currentZoom = mapBottom.current.getZoom();
+        if (type === 'in') {
+            mapBottom.current.zoomTo(currentZoom + 0.5, { duration: 300 });
+        } else if (type === 'out') {
+            mapBottom.current.zoomTo(currentZoom - 0.5, { duration: 300 });
+        }
+    };
+
     return (
         <div className="map-wrap absolute inset-0 w-full h-full bg-[#0b0e14]">
             {/* Bottom Map */}
@@ -1474,6 +1507,65 @@ export default function Map({
                         <span>{idlDays.rightDay}</span>
                         <span>▶</span>
                     </div>
+                </div>
+            )}
+            {/* TV Mode Map Navigation Control Pad */}
+            {tvMode && (
+                <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 pointer-events-auto flex flex-col items-center gap-2 bg-slate-950/85 backdrop-blur-md p-4 rounded-2xl border border-cyan-500/20 shadow-[0_0_25px_rgba(6,182,212,0.25)] select-none">
+                    <div className="text-[10px] font-mono font-bold text-cyan-400/80 tracking-widest uppercase mb-1">
+                        Map Navigation
+                    </div>
+                    {/* D-Pad (Cross layout) */}
+                    <div className="relative w-28 h-28">
+                        {/* Up */}
+                        <button
+                            onClick={() => handleMapPan('up')}
+                            className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-8 rounded-lg bg-slate-900 border border-cyan-500/20 hover:border-cyan-400 hover:text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 shadow-md flex items-center justify-center text-cyan-400 text-lg transition-all"
+                            title="Pan Up"
+                        >
+                            ▲
+                        </button>
+                        {/* Left */}
+                        <button
+                            onClick={() => handleMapPan('left')}
+                            className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-slate-900 border border-cyan-500/20 hover:border-cyan-400 hover:text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 shadow-md flex items-center justify-center text-cyan-400 text-lg transition-all"
+                            title="Pan Left"
+                        >
+                            ◀
+                        </button>
+                        {/* Center (Zoom In) */}
+                        <button
+                            onClick={() => handleMapZoom('in')}
+                            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/40 hover:border-cyan-400 hover:text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.2)] flex items-center justify-center text-cyan-400 text-base font-bold transition-all"
+                            title="Zoom In"
+                        >
+                            +
+                        </button>
+                        {/* Right */}
+                        <button
+                            onClick={() => handleMapPan('right')}
+                            className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-slate-900 border border-cyan-500/20 hover:border-cyan-400 hover:text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 shadow-md flex items-center justify-center text-cyan-400 text-lg transition-all"
+                            title="Pan Right"
+                        >
+                            ▶
+                        </button>
+                        {/* Down */}
+                        <button
+                            onClick={() => handleMapPan('down')}
+                            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-8 rounded-lg bg-slate-900 border border-cyan-500/20 hover:border-cyan-400 hover:text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 shadow-md flex items-center justify-center text-cyan-400 text-lg transition-all"
+                            title="Pan Down"
+                        >
+                            ▼
+                        </button>
+                    </div>
+                    {/* Zoom Out */}
+                    <button
+                        onClick={() => handleMapZoom('out')}
+                        className="w-24 h-7 rounded-lg bg-slate-900 border border-cyan-500/20 hover:border-cyan-400 hover:text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 shadow-md flex items-center justify-center text-cyan-400 text-xs font-mono font-bold transition-all"
+                        title="Zoom Out"
+                    >
+                        ZOOM OUT (-)
+                    </button>
                 </div>
             )}
         </div>

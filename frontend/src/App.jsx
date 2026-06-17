@@ -60,6 +60,38 @@ function App() {
     const [dayNightMode, setDayNightMode] = useState(false);
     const [showTimezones, setShowTimezones] = useState(false);
     const [showTicker, setShowTicker] = useState(true);
+    const [tvMode, setTvMode] = useState(false);
+
+    // Auto-detect TV User-Agents and load stored preference on mount
+    useEffect(() => {
+        const storedTvMode = localStorage.getItem('tvMode');
+        if (storedTvMode !== null) {
+            setTvMode(storedTvMode === 'true');
+        } else {
+            const ua = navigator.userAgent.toLowerCase();
+            const isTv = ua.includes('smarttv') || 
+                         ua.includes('googletv') || 
+                         ua.includes('appletv') || 
+                         ua.includes('firetv') || 
+                         ua.includes('firestick') || 
+                         ua.includes('silk/') || 
+                         ua.includes('xbox') || 
+                         ua.includes('playstation') || 
+                         ua.includes('dlna');
+            if (isTv) {
+                setTvMode(true);
+            }
+        }
+    }, []);
+
+    const toggleTvMode = () => {
+        setTvMode(prev => {
+            const next = !prev;
+            localStorage.setItem('tvMode', String(next));
+            return next;
+        });
+    };
+
     const [timeData, setTimeData] = useState(() => getLocalTimeData());
 
     useEffect(() => {
@@ -128,7 +160,7 @@ function App() {
     };
 
     return (
-        <div className="relative w-screen h-screen overflow-hidden selection:bg-cyan-500/30">
+        <div className={`relative w-screen h-screen overflow-hidden selection:bg-cyan-500/30 ${tvMode ? 'tv-mode' : ''}`}>
             {/* Map Background */}
             <div className="absolute inset-0 z-0">
                 <Map
@@ -144,6 +176,7 @@ function App() {
                     focusLocation={focusLocation}
                     dayNightMode={dayNightMode}
                     showTimezones={showTimezones}
+                    tvMode={tvMode}
                 />
             </div>
 
@@ -169,6 +202,8 @@ function App() {
                 toggleTimezones={() => setShowTimezones(!showTimezones)}
                 showTicker={showTicker}
                 toggleTicker={() => setShowTicker(!showTicker)}
+                tvMode={tvMode}
+                toggleTvMode={toggleTvMode}
             />
 
             {/* Header Overlay */}
@@ -220,7 +255,7 @@ function App() {
                 {/* Clock Widgets */}
                 {!showTimezones && (
                     <div className="absolute left-1/2 -translate-x-1/2 pointer-events-auto">
-                        <ClockWidget settings={clockSettings} />
+                        <ClockWidget settings={clockSettings} tvMode={tvMode} />
                     </div>
                 )}
             </header>
