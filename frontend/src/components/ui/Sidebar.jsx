@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AVAILABLE_TIMEZONES } from '../../utils/timezones';
 
-export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, showDateLine, toggleDateLine, weatherLayers, toggleWeatherLayer, moonData, issData, onLocate, clockSettings, toggleClockSetting, toggleTimezone, dayNightMode, toggleDayNightMode, showTimezones, toggleTimezones }) {
+export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, showDateLine, toggleDateLine, weatherLayers, toggleWeatherLayer, moonData, issData, onLocate, clockSettings, toggleClockSetting, toggleTimezone, dayNightMode, toggleDayNightMode, showTimezones, toggleTimezones, showTicker, toggleTicker }) {
 
     const [isOpen, setIsOpen] = useState(false);
 
@@ -314,6 +314,25 @@ export default function Sidebar({ mapStyle, onStyleChange, layers, toggleLayer, 
                 </div>
 
                 {/* Satellites section temporarily disabled due to network limitations */}
+
+                <div className="mt-6 pt-6 border-t border-white/10">
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent mb-6">
+                        HUD Controls
+                    </h2>
+
+                    <div className="space-y-6">
+                        {/* News Ticker Toggle */}
+                        <div className="flex items-center justify-between">
+                            <span className="text-gray-300 font-medium tracking-wide">News Ticker</span>
+                            <button
+                                onClick={toggleTicker}
+                                className={`w-12 h-6 rounded-full transition-colors relative ${showTicker ? 'bg-amber-500' : 'bg-gray-700'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${showTicker ? 'translate-x-6' : 'translate-x-0'}`} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
                 <div className="mt-6 pt-6 border-t border-white/10">
                     <h2 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent mb-6">

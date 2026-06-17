@@ -59,6 +59,7 @@ function App() {
     const [focusLocation, setFocusLocation] = useState(null);
     const [dayNightMode, setDayNightMode] = useState(false);
     const [showTimezones, setShowTimezones] = useState(false);
+    const [showTicker, setShowTicker] = useState(true);
     const [timeData, setTimeData] = useState(() => getLocalTimeData());
 
     useEffect(() => {
@@ -166,6 +167,8 @@ function App() {
                 toggleDayNightMode={() => setDayNightMode(!dayNightMode)}
                 showTimezones={showTimezones}
                 toggleTimezones={() => setShowTimezones(!showTimezones)}
+                showTicker={showTicker}
+                toggleTicker={() => setShowTicker(!showTicker)}
             />
 
             {/* Header Overlay */}
@@ -242,12 +245,14 @@ function App() {
             </footer>
 
             {/* Ticker Overlay */}
-            <Ticker
-                earthquakeData={earthquakeData}
-                volcanoData={volcanoData}
-                moonData={moonData}
-                issData={issData}
-            />
+            {showTicker && (
+                <Ticker
+                    earthquakeData={earthquakeData}
+                    volcanoData={volcanoData}
+                    moonData={moonData}
+                    issData={issData}
+                />
+            )}
         </div>
     );
 }
