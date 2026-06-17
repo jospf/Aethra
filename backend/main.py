@@ -16,9 +16,11 @@ moon = ephemeris['moon']
 earth = ephemeris['earth']
 sun = ephemeris['sun']
 
-@app.get("/")
-def read_root():
-    return {"message": "Aethra Backend Online"}
+frontend_dist_path = os.path.join(os.path.dirname(__file__), "dist")
+if not os.path.exists(frontend_dist_path):
+    @app.get("/")
+    def read_root():
+        return {"message": "Aethra Backend Online"}
 
 @app.get("/api/health")
 def health_check():
@@ -476,3 +478,8 @@ def get_ships():
         features.append(feature)
     
     return {"type": "FeatureCollection", "features": features}
+
+if os.path.exists(frontend_dist_path):
+    from fastapi.staticfiles import StaticFiles
+    app.mount("/", StaticFiles(directory=frontend_dist_path, html=True), name="frontend")
+

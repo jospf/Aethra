@@ -6,3 +6,4 @@ feedparser
 requests
 python-dotenv
 websockets
+aiofiles
